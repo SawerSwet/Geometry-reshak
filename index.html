@@ -1,0 +1,4513 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<meta name="theme-color" content="#0a0a0f">
+<title>Math Solver 8 — Алгебра + Геометрия + Локальный ИИ + Камера</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<style>
+  :root{
+    --bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a26;
+    --fg:#e8e8f0;--fg2:#a0a0b0;
+    --accent:#6c5ce7;--accent2:#00d2ff;
+    --success:#00e676;--warn:#ffab00;--err:#ff5252;
+    --border:#2a2a3a;--radius:10px;
+  }
+  [data-theme="light"]{
+    --bg:#f5f5fa;--bg2:#fff;--bg3:#eaeaf0;
+    --fg:#1a1a26;--fg2:#606070;--border:#d0d0d8;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    font-size:14px;overflow-x:hidden;}
+  header{position:sticky;top:0;z-index:100;background:var(--bg2);
+    border-bottom:1px solid var(--border);padding:10px 12px;
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  header h1{margin:0;font-size:15px;font-weight:700;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    background-clip:text;}
+  .status-badge{font-size:10px;padding:3px 8px;border-radius:20px;
+    background:var(--bg3);color:var(--fg2);border:1px solid var(--border);
+    white-space:nowrap;}
+  .status-badge.ok{color:var(--success);border-color:var(--success);}
+  .status-badge.busy{color:var(--warn);border-color:var(--warn);}
+  .status-badge.err{color:var(--err);border-color:var(--err);}
+  .theme-btn{margin-left:auto;background:var(--bg3);border:1px solid var(--border);
+    color:var(--fg);width:34px;height:34px;border-radius:50%;font-size:16px;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  nav.tabs{display:flex;overflow-x:auto;gap:6px;padding:8px 10px;
+    background:var(--bg2);border-bottom:1px solid var(--border);
+    scrollbar-width:none;}
+  nav.tabs::-webkit-scrollbar{display:none;}
+  .tab-btn{flex-shrink:0;padding:8px 14px;border-radius:20px;
+    background:var(--bg3);border:1px solid var(--border);color:var(--fg2);
+    font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;
+    transition:all .2s;}
+  .tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+  main{padding:12px;padding-bottom:100px;max-width:900px;margin:0 auto;}
+  .panel{display:none;}
+  .panel.active{display:block;animation:fadeIn .2s;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+  .card{background:var(--bg2);border:1px solid var(--border);
+    border-radius:var(--radius);padding:12px;margin-bottom:12px;}
+  .card h2{margin:0 0 10px 0;font-size:14px;display:flex;align-items:center;gap:6px;}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  button.btn{background:var(--bg3);border:1px solid var(--border);color:var(--fg);
+    padding:9px 14px;border-radius:8px;font-size:13px;font-weight:600;
+    cursor:pointer;transition:all .15s;display:inline-flex;
+    align-items:center;gap:6px;justify-content:center;}
+  button.btn:active{transform:scale(.97);}
+  button.btn.primary{background:linear-gradient(135deg,var(--accent),#8b7ce7);
+    border-color:transparent;color:#fff;}
+  button.btn.big{padding:16px 20px;font-size:15px;width:100%;}
+  button.btn.danger{background:#3a1020;border-color:var(--err);color:var(--err);}
+  button.btn:disabled{opacity:.4;cursor:not-allowed;}
+  button.btn.small{padding:5px 10px;font-size:11px;}
+  button.btn.success{background:linear-gradient(135deg,#00e676,#00b060);
+    border-color:transparent;color:#000;}
+  input,select,textarea{background:var(--bg3);border:1px solid var(--border);
+    color:var(--fg);padding:8px 10px;border-radius:8px;font-size:13px;
+    font-family:inherit;width:100%;}
+  textarea{font-family:monospace;font-size:12px;min-height:100px;resize:vertical;}
+  .stat-line{display:flex;justify-content:space-between;font-size:11px;
+    color:var(--fg2);padding:2px 0;gap:6px;flex-wrap:wrap;}
+  .stat-line b{color:var(--fg);font-weight:600;font-family:monospace;}
+  .code-out{background:#000;color:#0f0;font-family:monospace;font-size:11px;
+    padding:10px;border-radius:6px;max-height:400px;overflow:auto;
+    white-space:pre-wrap;word-break:break-word;border:1px solid var(--border);
+    user-select:text;line-height:1.5;}
+  .small{font-size:10px;}
+  .mt{margin-top:8px;}
+  .mb{margin-bottom:8px;}
+  .flex1{flex:1;}
+  .toast{position:fixed;bottom:20px;left:50%;
+    transform:translateX(-50%) translateY(100px);
+    background:var(--accent);color:#fff;padding:10px 18px;border-radius:24px;
+    font-size:13px;z-index:9999;transition:transform .3s;max-width:90%;
+    text-align:center;}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .example-btn{display:inline-block;padding:4px 8px;margin:2px;
+    background:var(--bg3);border:1px solid var(--border);border-radius:12px;
+    font-size:11px;cursor:pointer;color:var(--fg2);}
+  .example-btn:hover{background:var(--accent);color:#fff;}
+  .solution-step{padding:8px 10px;margin:6px 0;background:var(--bg3);
+    border-left:3px solid var(--accent);border-radius:4px;
+    font-size:13px;line-height:1.6;overflow-x:auto;}
+  .solution-step .num{display:inline-block;width:20px;height:20px;
+    line-height:20px;text-align:center;border-radius:50%;
+    background:var(--accent);color:#fff;font-size:11px;font-weight:700;
+    margin-right:6px;vertical-align:top;}
+  .solution-step .formula{margin:4px 0;overflow-x:auto;}
+  .solution-answer{padding:12px;margin-top:8px;
+    background:linear-gradient(135deg,#00e67622,#00d2ff22);
+    border:1px solid var(--success);border-radius:8px;
+    font-size:15px;font-weight:700;text-align:center;color:var(--success);}
+  .solution-error{padding:10px;margin-top:8px;background:#3a1020;
+    border:1px solid var(--err);border-radius:8px;font-size:13px;color:var(--err);}
+  .log{background:#000;color:#0f0;font-family:monospace;font-size:10px;
+    padding:8px;border-radius:6px;max-height:200px;overflow-y:auto;
+    white-space:pre-wrap;word-break:break-all;border:1px solid var(--border);}
+  canvas.preview{max-width:100%;background:#fff;border-radius:8px;
+    display:block;margin:8px auto;border:1px solid var(--border);}
+  .drop-zone{border:2px dashed var(--border);border-radius:8px;
+    padding:20px;text-align:center;color:var(--fg2);font-size:12px;
+    margin-bottom:8px;cursor:pointer;transition:all .2s;}
+  .drop-zone:hover{border-color:var(--accent);color:var(--fg);}
+  .drop-zone.dragover{border-color:var(--accent);background:var(--bg3);}
+  .page-item{background:var(--bg3);border:1px solid var(--border);
+    border-radius:6px;padding:8px;margin-bottom:6px;font-size:11px;
+    cursor:pointer;}
+  .page-item:hover{border-color:var(--accent);}
+  .page-item .date{color:var(--fg2);font-size:10px;}
+  .page-item .book{color:var(--accent2);font-size:10px;font-weight:700;}
+  .progress{background:var(--bg3);border-radius:6px;height:8px;
+    overflow:hidden;margin:8px 0;border:1px solid var(--border);display:none;}
+  .progress>div{height:100%;background:var(--accent2);
+    transition:width .2s;width:0;}
+  .progress.show{display:block;}
+  .book-card{background:var(--bg3);border:1px solid var(--border);
+    border-radius:8px;padding:10px;margin-bottom:8px;cursor:pointer;
+    transition:all .2s;}
+  .book-card:hover{border-color:var(--accent);}
+  .book-card.active{border-color:var(--accent);background:var(--accent);color:#fff;}
+  .book-card h3{margin:0 0 4px 0;font-size:13px;}
+  .book-card .meta{font-size:10px;color:var(--fg2);}
+  .book-card.active .meta{color:#fff;}
+  .metric{display:inline-block;padding:8px 12px;background:var(--bg3);
+    border-radius:8px;margin:4px;font-size:12px;min-width:100px;text-align:center;}
+  .metric .val{font-size:18px;font-weight:700;color:var(--accent2);
+    display:block;margin-top:4px;}
+  .formula-item{background:var(--bg3);border-radius:8px;padding:12px;
+    margin-bottom:8px;cursor:pointer;transition:all .2s;
+    border:1px solid transparent;}
+  .formula-item:hover{border-color:var(--accent);background:var(--bg2);}
+  .formula-item .title{font-size:11px;color:var(--fg2);
+    text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;}
+  .formula-item .body{font-size:15px;color:var(--fg);text-align:center;
+    padding:6px 0;overflow-x:auto;}
+  .katex-display{margin:6px 0 !important;}
+  .katex{font-size:1em !important;}
+  .formula-item .katex-display{margin:0 !important;}
+  .example-item{background:var(--bg3);border-radius:6px;padding:6px 8px;
+    margin-bottom:4px;font-size:11px;display:flex;justify-content:space-between;
+    align-items:center;gap:6px;}
+  .example-item button{background:transparent;border:none;color:var(--err);
+    cursor:pointer;font-size:14px;}
+  .template-item{background:var(--bg3);border-radius:6px;padding:8px;
+    margin-bottom:6px;font-size:11px;border-left:3px solid var(--accent2);}
+  .template-item .tmpl-title{font-weight:700;color:var(--accent2);
+    margin-bottom:4px;font-size:10px;text-transform:uppercase;}
+  .template-item .tmpl-body{color:var(--fg2);font-size:10px;
+    max-height:60px;overflow:hidden;text-overflow:ellipsis;}
+  .chat-msg{padding:10px;margin:6px 0;border-radius:8px;font-size:13px;
+    line-height:1.6;overflow-wrap:break-word;}
+  .chat-msg.user{background:var(--accent);color:#fff;margin-left:20%;}
+  .chat-msg.ai{background:var(--bg3);border-left:3px solid var(--accent2);}
+  .chat-msg .role{font-size:10px;color:var(--fg2);margin-bottom:4px;
+    text-transform:uppercase;letter-spacing:0.5px;font-weight:700;}
+  .chat-msg.user .role{color:#fff;opacity:.7;}
+  .chat-container{max-height:400px;overflow-y:auto;padding:6px;
+    background:var(--bg);border-radius:8px;border:1px solid var(--border);
+    margin-bottom:8px;}
+  .ai-loading{display:inline-block;width:8px;height:8px;border-radius:50%;
+    background:var(--accent2);animation:pulse 1.4s infinite;}
+  @keyframes pulse{0%,100%{opacity:0.3;}50%{opacity:1;}}
+  .mode-switch{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap;}
+  .mode-btn{padding:6px 12px;border-radius:16px;background:var(--bg3);
+    border:1px solid var(--border);color:var(--fg2);font-size:11px;
+    font-weight:600;cursor:pointer;}
+  .mode-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+  #cameraVideo{width:100%;max-width:500px;background:#000;border-radius:8px;
+    display:block;margin:8px auto;border:1px solid var(--border);}
+  #cameraCanvas{display:none;}
+  .camera-container{position:relative;}
+  .camera-controls{display:flex;gap:8px;justify-content:center;margin-top:8px;}
+  .camera-btn{width:60px;height:60px;border-radius:50%;background:#fff;
+    border:4px solid var(--accent);cursor:pointer;font-size:0;padding:0;}
+  .camera-btn:active{transform:scale(.9);}
+  .snapshot-preview{max-width:100%;border-radius:8px;margin:8px auto;
+    display:block;border:1px solid var(--border);}
+</style>
+</head>
+<body data-theme="dark">
+
+<header>
+  <h1>📐 Math Solver 8</h1>
+  <span id="statusBadge" class="status-badge">загрузка...</span>
+  <button class="theme-btn" id="themeBtn">🌙</button>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="solve">🧮 Решить</button>
+  <button class="tab-btn" data-tab="camera">📷 Камера</button>
+  <button class="tab-btn" data-tab="ai">🤖 Локальный ИИ</button>
+  <button class="tab-btn" data-tab="geometry">📐 Геометрия</button>
+  <button class="tab-btn" data-tab="learn">🧠 Обучение</button>
+  <button class="tab-btn" data-tab="library">📚 Учебники</button>
+  <button class="tab-btn" data-tab="draw">✏️ Рисовать</button>
+  <button class="tab-btn" data-tab="plot">📈 График</button>
+  <button class="tab-btn" data-tab="dataset">📊 Датасет</button>
+  <button class="tab-btn" data-tab="search">🔍 Поиск</button>
+  <button class="tab-btn" data-tab="export">💾 Экспорт</button>
+  <button class="tab-btn" data-tab="logs">📋 Лог</button>
+</nav>
+
+<main>
+
+<section class="panel active" id="panel-solve">
+  <div class="card">
+    <h2>🧮 Введи задачу</h2>
+    <div class="mode-switch">
+      <button class="mode-btn active" data-mode="auto">🎯 Авто (правила → ИИ)</button>
+      <button class="mode-btn" data-mode="rules">📐 Только правила</button>
+      <button class="mode-btn" data-mode="ai">🤖 Только ИИ</button>
+    </div>
+    <textarea id="taskInput" placeholder="Примеры:&#10;площадь круга r=5&#10;площадь трапеции a=4 b=6 h=3&#10;найди гипотенузу если катеты 3 и 4&#10;найди расстояние между точками A(1;2) и B(4;6)&#10;в треугольнике ABC AB=5 AC=7 ∠A=60° AD биссектриса&#10;ромб ABCD диагонали 6 и 8 найди площадь"></textarea>
+    <div class="row mt">
+      <button class="btn primary flex1" id="btnSolve">📐 Решить</button>
+      <button class="btn" id="btnClearTask">🗑</button>
+    </div>
+    <div class="small mt" style="color:var(--fg2);margin-bottom:4px">Примеры:</div>
+    <div id="exampleButtons"></div>
+  </div>
+
+  <div class="card" id="solutionCard" style="display:none">
+    <h2>📝 Решение</h2>
+    <div id="detectedType" class="small mb" style="color:var(--fg2)"></div>
+    <div id="neuralPrediction" class="small mb" style="color:var(--accent2);display:none"></div>
+    <div id="solutionSteps"></div>
+    <div id="solutionAnswer"></div>
+    <div id="figureContainer"></div>
+    <div class="row mt">
+      <button class="btn small" id="btnSendToLearn">🧠 Обучить</button>
+      <button class="btn small" id="btnSaveToBook">💾 В учебник</button>
+      <button class="btn small" id="btnAskAIAboutThis">🤖 Спросить ИИ</button>
+      <button class="btn small" id="btnRedrawFigure">🎨 Перерисовать</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📊 Статистика</h2>
+    <div class="stat-line"><span>Решено:</span><b id="statSolved">0</b></div>
+    <div class="stat-line"><span>Правил:</span><b id="statRules">0</b></div>
+    <div class="stat-line"><span>Учебников:</span><b id="statBooks">0</b></div>
+    <div class="stat-line"><span>Страниц:</span><b id="statPages">0</b></div>
+    <div class="stat-line"><span>Шаблонов:</span><b id="statTemplates">0</b></div>
+    <div class="stat-line"><span>Примеров:</span><b id="statExamples">0</b></div>
+    <div class="stat-line"><span>В датасете:</span><b id="statDataset">0</b></div>
+    <div class="stat-line"><span>Классификатор:</span><b id="statClassifier">не обучен</b></div>
+  </div>
+</section>
+
+<section class="panel" id="panel-camera">
+  <div class="card">
+    <h2>📷 Сфотографировать задачу</h2>
+    <p class="small" style="color:var(--fg2);margin:0 0 8px">
+      Наведи камеру на задачу и нажми кружок. ИИ распознает текст и решит.
+      Требует HTTPS или localhost.
+    </p>
+    <div class="stat-line mb"><span>Камера:</span><b id="cameraStatus">не активна</b></div>
+    <div class="camera-container">
+      <video id="cameraVideo" autoplay playsinline muted></video>
+      <canvas id="cameraCanvas"></canvas>
+    </div>
+    <div class="row mt">
+      <button class="btn primary flex1" id="btnStartCamera">📷 Включить камеру</button>
+      <button class="btn" id="btnStopCamera" disabled>⏹ Выключить</button>
+      <button class="btn" id="btnSwitchCamera">🔄 Сменить</button>
+    </div>
+    <div class="camera-controls" id="cameraControls" style="display:none">
+      <button class="camera-btn" id="btnSnapshot"></button>
+    </div>
+    <img id="snapshotPreview" class="snapshot-preview" style="display:none" />
+    <div class="row mt" id="snapshotActions" style="display:none">
+      <button class="btn primary flex1" id="btnSolveFromCamera">🤖 Решить из фото</button>
+      <button class="btn" id="btnRetakeCamera">🔄 Переснять</button>
+      <button class="btn danger" id="btnDeleteSnapshot">🗑</button>
+    </div>
+    <div id="cameraOCRResult" class="code-out mt" style="display:none">—</div>
+    <div id="cameraSolution" class="mt"></div>
+  </div>
+
+  <div class="card">
+    <h2>📁 Загрузить фото</h2>
+    <div class="drop-zone" id="photoDropZone2">
+      🖼 Нажми или перетащи фото
+      <input type="file" id="photoFile2" accept="image/*" style="display:none">
+    </div>
+    <img id="photoPreview" class="snapshot-preview" style="display:none" />
+    <div class="row mt" id="photoActions" style="display:none">
+      <button class="btn primary flex1" id="btnSolveFromPhoto">🤖 Решить из фото</button>
+      <button class="btn danger" id="btnDeletePhoto">🗑</button>
+    </div>
+    <div id="photoOCRResult" class="code-out mt" style="display:none">—</div>
+  </div>
+</section>
+
+<section class="panel" id="panel-ai">
+  <div class="card">
+    <h2>🤖 Qwen2.5-1.5B-Instruct</h2>
+    <p class="small" style="color:var(--fg2);margin:0 0 8px">
+      Локальная LLM (~1 ГБ) через WebGPU. Работает офлайн после загрузки.
+    </p>
+    <div class="stat-line mb"><span>Модель:</span><b id="aiModelStatus">не загружена</b></div>
+    <div class="stat-line mb"><span>Устройство:</span><b id="aiDevice">—</b></div>
+    <div class="progress" id="aiLoadProgress"><div id="aiLoadFill"></div></div>
+    <div class="row">
+      <button class="btn primary flex1" id="btnLoadAI">📥 Загрузить Qwen2.5-1.5B</button>
+      <button class="btn danger" id="btnUnloadAI" disabled>✕ Выгрузить</button>
+    </div>
+    <div class="small mt" style="color:var(--fg2)">
+      💡 Первая загрузка: ~1 ГБ, 5-15 минут. Дальше — из кэша браузера.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>💬 Чат с ИИ</h2>
+    <div class="chat-container" id="aiChat"></div>
+    <textarea id="aiInput" placeholder="Спроси что-нибудь:&#10;• Объясни теорему Пифагора&#10;• Что такое вписанный угол?&#10;• Реши: катеты 3 и 4, найди гипотенузу" style="min-height:70px"></textarea>
+    <div class="row mt">
+      <button class="btn primary flex1" id="btnAISend">📤 Отправить</button>
+      <button class="btn" id="btnAIClear">🗑</button>
+    </div>
+    <div class="row mt">
+      <input type="number" id="aiMaxTokens" value="512" style="max-width:100px" title="Макс токенов">
+      <input type="number" id="aiTemperature" value="0.3" step="0.1" min="0" max="2" style="max-width:100px" title="Температура">
+      <button class="btn small" id="btnAIPresetGeometry">📐 Геометрия</button>
+      <button class="btn small" id="btnAIPresetAlgebra">🧮 Алгебра</button>
+      <button class="btn small" id="btnAIPresetTutor">👨‍🏫 Учитель</button>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="panel-geometry">
+  <div class="card">
+    <h2>📐 Справочник по геометрии</h2>
+    <input type="text" id="geoSearch" placeholder="Поиск: Пифагор, площадь, ромб, вектор...">
+    <div id="geoResults" class="mt"></div>
+  </div>
+  <div class="card">
+    <h2>📚 Все теоремы</h2>
+    <div id="geoTheoremsList"></div>
+  </div>
+  <div class="card">
+    <h2>🔷 Свойства фигур</h2>
+    <div id="geoFiguresList"></div>
+  </div>
+  <div class="card">
+    <h2>📏 Формулы площадей</h2>
+    <div id="geoFormulasList"></div>
+  </div>
+  <div class="card">
+    <h2>🧭 Тригонометрия</h2>
+    <div id="geoTrigList"></div>
+  </div>
+  <div class="card">
+    <h2>➡️ Векторы и координаты</h2>
+    <div id="geoVectorsList"></div>
+  </div>
+</section>
+
+<section class="panel" id="panel-learn">
+  <div class="card">
+    <h2>🧠 Обучение классификатора</h2>
+    <div class="stat-line mb"><span>Модель:</span><b id="trainModelStatus">не обучена</b></div>
+    <div class="stat-line mb"><span>Примеров:</span><b id="trainExampleCount">0</b></div>
+
+    <div style="display:grid;grid-template-columns:1fr auto;gap:6px 8px;font-size:12px;align-items:center">
+      <span style="color:var(--fg2)">Embedding</span>
+      <input type="number" id="trainEmbed" value="32" min="8" max="128" style="max-width:150px">
+      <span style="color:var(--fg2)">Скрытых</span>
+      <input type="number" id="trainHidden" value="48" min="8" max="256" style="max-width:150px">
+      <span style="color:var(--fg2)">Эпох</span>
+      <input type="number" id="trainEpochs" value="150" min="10" max="2000" style="max-width:150px">
+      <span style="color:var(--fg2)">Батч</span>
+      <input type="number" id="trainBatch" value="16" min="1" max="64" style="max-width:150px">
+      <span style="color:var(--fg2)">LR</span>
+      <input type="number" id="trainLR" value="0.005" step="0.001" min="0.0001" max="0.1" style="max-width:150px">
+    </div>
+
+    <div class="progress" id="trainProgress"><div id="trainProgressFill"></div></div>
+    <div class="row mt">
+      <button class="btn primary flex1" id="btnTrain">🎓 Обучить</button>
+      <button class="btn danger" id="btnCancelTrain" disabled>✕ Стоп</button>
+    </div>
+    <div class="row mt">
+      <div class="metric">Эпоха<span class="val" id="metricEpoch">0/0</span></div>
+      <div class="metric">Loss<span class="val" id="metricLoss">—</span></div>
+      <div class="metric">Acc<span class="val" id="metricAcc">—</span></div>
+    </div>
+    <canvas id="trainChart" height="140" width="600" class="preview" style="background:#000"></canvas>
+    <div class="row mt">
+      <button class="btn" id="btnSaveClassifier">💾 Сохранить</button>
+      <button class="btn" id="btnLoadClassifier">📂 Загрузить</button>
+      <button class="btn danger" id="btnResetClassifier">🔄 Сбросить</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📋 Примеры для обучения</h2>
+    <div class="row mb">
+      <input type="text" id="newExampleText" placeholder="Текст задачи" style="flex:1;min-width:150px">
+      <select id="newExampleType" style="max-width:180px"></select>
+      <button class="btn primary" id="btnAddExample">➕</button>
+    </div>
+    <div class="row mb">
+      <button class="btn small" id="btnAddDefaults">📥 Стандартные</button>
+      <button class="btn small" id="btnAddGeometry">📐 Геометрия</button>
+      <button class="btn small" id="btnAddFromBooks">📚 Из учебников</button>
+      <button class="btn small danger" id="btnClearExamples">🗑 Очистить</button>
+    </div>
+    <div class="code-out" id="examplesList" style="max-height:300px">Нет примеров</div>
+  </div>
+
+  <div class="card">
+    <h2>📐 Шаблоны решений из учебников</h2>
+    <div class="row mb">
+      <button class="btn small" id="btnRefreshTemplates">🔄 Обновить</button>
+      <button class="btn small danger" id="btnCleanTemplates">🧹 Очистить мусор</button>
+      <button class="btn small danger" id="btnClearTemplates">🗑 Очистить всё</button>
+    </div>
+    <div class="code-out" id="templatesList" style="max-height:300px">Нет шаблонов</div>
+  </div>
+
+  <div class="card">
+    <h2>🎯 Проверка</h2>
+    <input type="text" id="testClassifierInput" placeholder="Введи текст задачи">
+    <div class="row mt">
+      <button class="btn primary flex1" id="btnTestClassifier">🔬 Проверить</button>
+    </div>
+    <div id="testClassifierResult" class="code-out mt" style="display:none">—</div>
+  </div>
+</section>
+
+<section class="panel" id="panel-library">
+  <div class="card">
+    <h2>📚 Мои учебники</h2>
+    <div class="row mb">
+      <input type="text" id="newBookName" placeholder="Название учебника" style="flex:1;min-width:150px">
+      <button class="btn primary" id="btnAddBook">➕ Создать</button>
+    </div>
+    <div id="booksList"></div>
+    <div class="row mt">
+      <button class="btn flex1" id="btnExportBooks">⬇ Скачать</button>
+      <button class="btn" id="btnImportBooks">📂 Загрузить</button>
+      <input type="file" id="importBooksFile" accept=".json" style="display:none">
+      <button class="btn danger" id="btnClearBooks">🗑</button>
+    </div>
+  </div>
+
+  <div class="card" id="bookCard" style="display:none">
+    <h2>📖 <span id="bookNameLabel">—</span></h2>
+    <div class="stat-line"><span>Страниц:</span><b id="bookPages">0</b></div>
+    <div class="stat-line"><span>Шаблонов:</span><b id="bookTemplates">0</b></div>
+    <div class="row mt">
+      <button class="btn flex1" id="btnViewBookPages">📄 Страницы</button>
+      <button class="btn flex1" id="btnViewBookTemplates">📐 Шаблоны</button>
+      <button class="btn primary flex1" id="btnAutoProcessBook">🤖 Обработать всё</button>
+      <button class="btn danger" id="btnDeleteBook">🗑</button>
+    </div>
+    <div class="progress" id="bookProcessProgress"><div id="bookProcessFill"></div></div>
+    <div class="stat-line mt"><span>Обработано:</span><b id="bookProcessStatus">—</b></div>
+    <div id="bookContent" class="mt"></div>
+  </div>
+
+  <div class="card">
+    <h2>📄 Загрузить PDF</h2>
+    <select id="pdfBookSelect" class="mb">
+      <option value="">— выбери учебник —</option>
+    </select>
+    <div class="drop-zone" id="pdfDropZone">
+      📄 Нажми или перетащи PDF
+      <input type="file" id="pdfFile" accept=".pdf,application/pdf" style="display:none">
+    </div>
+    <div class="progress" id="pdfProgress"><div id="pdfFill"></div></div>
+    <div class="stat-line"><span>PDF:</span><b id="pdfName">—</b></div>
+    <div class="stat-line"><span>Страниц:</span><b id="pdfPages">0</b></div>
+    <div class="row mt">
+      <button class="btn primary flex1" id="btnReadPdf">📖 Прочитать весь</button>
+      <button class="btn" id="btnPdfPrev">◀</button>
+      <button class="btn" id="btnPdfNext">▶</button>
+    </div>
+    <div class="stat-line">
+      <span>Стр. <b id="pdfCurrentPage">0</b></span>
+      <button class="btn small" id="btnSavePdfPage">💾 Сохранить</button>
+      <button class="btn small" id="btnCheckPdfPage">🔍 Проверить</button>
+    </div>
+    <div class="row mt">
+      <button class="btn small" id="btnPdfRaw">📄 Сырой текст</button>
+      <button class="btn small" id="btnPdfEdit">✏️ Редактировать</button>
+    </div>
+    <div id="pdfRawText" class="code-out mt" style="display:none">—</div>
+    <textarea id="pdfEditedText" class="mt" style="display:none;min-height:200px"></textarea>
+    <button class="btn primary mt" id="btnSaveEditedPage" style="display:none">💾 Сохранить</button>
+    <div id="pdfPageText" class="code-out mt" style="display:none">—</div>
+    <canvas id="pdfCanvas" class="preview mt" style="display:none"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>📸 Фото страницы (OCR)</h2>
+    <div class="stat-line mb"><span>Florence-2:</span><b id="ocrModelStatus">не загружена</b></div>
+    <button class="btn primary big" id="btnLoadOCR">📥 Загрузить Florence-2</button>
+    <div class="progress" id="ocrLoadProgress"><div id="ocrLoadFill"></div></div>
+    <select id="ocrBookSelect" class="mb mt">
+      <option value="">— выбери учебник —</option>
+    </select>
+    <div class="drop-zone" id="photoDropZone">
+      📷 Нажми или перетащи фото
+      <input type="file" id="photoFile" accept="image/*" style="display:none">
+    </div>
+    <img id="ocrPreview" style="display:none;max-width:100%;border-radius:6px;margin-top:8px" />
+    <div id="ocrProgress" class="small" style="color:var(--fg2);display:none">
+      Обработка... <span id="ocrProgressText"></span>
+    </div>
+    <div class="row mt" id="ocrModes" style="display:none">
+      <button class="btn small" data-ocrmode="<OCR>">📝 Текст</button>
+      <button class="btn small" data-ocrmode="<CAPTION>">📋 Описание</button>
+      <button class="btn small" data-ocrmode="<OD>">🔷 Фигуры</button>
+      <button class="btn small" data-ocrmode="<MORE_DETAILED_CAPTION>">🔍 Детально</button>
+    </div>
+    <div id="ocrResult" class="code-out mt" style="display:none">—</div>
+    <div class="row mt" id="ocrActions" style="display:none">
+      <button class="btn primary flex1" id="btnSaveOCR">💾 В учебник</button>
+      <button class="btn" id="btnExtractTemplates">📐 Шаблоны</button>
+      <button class="btn" id="btnAskAIAboutOCR">🤖 Спросить ИИ</button>
+      <button class="btn danger" id="btnClearOCR">🗑</button>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="panel-draw">
+  <div class="card">
+    <h2>✏️ Рисование фигур</h2>
+    <input type="text" id="drawInput" placeholder="ромб ABCD диагонали 6 и 8 или треугольник ABC AB=5 BC=6 CA=7">
+    <div class="row mt">
+      <button class="btn primary flex1" id="btnDraw">🎨 Нарисовать</button>
+      <button class="btn" id="btnClearDraw">🗑</button>
+      <button class="btn" id="btnDownloadDraw">⬇</button>
+    </div>
+    <div class="small mt" style="color:var(--fg2);margin-bottom:4px">Примеры:</div>
+    <div id="drawExampleButtons"></div>
+  </div>
+  <div class="card">
+    <canvas id="drawCanvas" width="600" height="500" class="preview"></canvas>
+  </div>
+</section>
+
+<section class="panel" id="panel-plot">
+  <div class="card">
+    <h2>📈 Построение графика</h2>
+    <input type="text" id="plotInput" placeholder="y = x^2 - 4x + 3" autocomplete="off">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+      <div><label class="small" style="color:var(--fg2)">X min</label><input type="number" id="plotXMin" value="-10"></div>
+      <div><label class="small" style="color:var(--fg2)">X max</label><input type="number" id="plotXMax" value="10"></div>
+      <div><label class="small" style="color:var(--fg2)">Y min</label><input type="number" id="plotYMin" value="-10"></div>
+      <div><label class="small" style="color:var(--fg2)">Y max</label><input type="number" id="plotYMax" value="10"></div>
+    </div>
+    <div class="row mt">
+      <button class="btn primary flex1" id="btnPlot">📈 Построить</button>
+      <button class="btn" id="btnPlotClear">🗑</button>
+      <button class="btn" id="btnPlotDownload">⬇</button>
+    </div>
+    <div class="small mt" style="color:var(--fg2)">Примеры:</div>
+    <div id="plotExamples"></div>
+  </div>
+  <div class="card">
+    <canvas id="plotCanvas" width="600" height="500" class="preview"></canvas>
+  </div>
+</section>
+
+<section class="panel" id="panel-dataset">
+  <div class="card">
+    <h2>📊 Датасет для fine-tuning</h2>
+    <p class="small" style="color:var(--fg2);margin:0 0 8px">
+      Все решённые задачи сохраняются в формате JSONL.
+      Формат: {"messages": [{"role":"user",...},{"role":"assistant",...}]}
+    </p>
+    <div class="stat-line mb"><span>Записей:</span><b id="datasetCount">0</b></div>
+    <div class="stat-line mb"><span>Verified:</span><b id="datasetVerified">0</b></div>
+    <div class="stat-line mb"><span>Неverified:</span><b id="datasetUnverified">0</b></div>
+    <div class="stat-line mb"><span>Размер:</span><b id="datasetSize">—</b></div>
+    <div class="row mt">
+      <button class="btn primary flex1" id="btnExportDataset">📦 Скачать JSONL</button>
+      <button class="btn" id="btnImportDataset">📂 Загрузить</button>
+      <input type="file" id="importDatasetFile" accept=".jsonl,.json" style="display:none">
+      <button class="btn danger" id="btnClearDataset">🗑</button>
+    </div>
+    <div class="row mt">
+      <button class="btn" id="btnVerifyDataset">🔍 Проверить все ИИ-ответы</button>
+      <button class="btn" id="btnExportVerifiedOnly">✅ Только verified</button>
+    </div>
+    <div class="code-out mt" id="datasetPreview" style="max-height:300px">Пусто</div>
+  </div>
+
+  <div class="card">
+    <h2>🎓 Инструкция по fine-tuning</h2>
+    <ol class="small" style="color:var(--fg2);line-height:1.8;padding-left:20px;margin:0">
+      <li>Набери 500+ verified задач</li>
+      <li>Скачай JSONL (только verified)</li>
+      <li>Открой Google Colab (бесплатно)</li>
+      <li>Модель: <code>unsloth/Qwen2.5-1.5B-Instruct-bnb-4bit</code></li>
+      <li>Обучи LoRA (2-4 часа на T4)</li>
+      <li>Скачай адаптер (10-50 МБ)</li>
+      <li>Загрузи в приложение</li>
+    </ol>
+  </div>
+</section>
+
+<section class="panel" id="panel-search">
+  <div class="card">
+    <h2>🔍 Поиск по базе</h2>
+    <input type="text" id="globalSearch" placeholder="Теорема Виета, дискриминант, площадь круга...">
+    <div id="searchResults" class="mt"></div>
+  </div>
+</section>
+
+<section class="panel" id="panel-export">
+  <div class="card">
+    <h2>💾 Экспорт</h2>
+    <button class="btn primary big" id="btnExportAll">📦 Скачать всё (JSON)</button>
+    <div class="row mt">
+      <button class="btn flex1" id="btnImportAll">📂 Загрузить</button>
+      <input type="file" id="importAllFile" accept=".json" style="display:none">
+    </div>
+    <div class="stat-line mt"><span>Размер:</span><b id="exportSize">—</b></div>
+    <div class="stat-line"><span>Учебников:</span><b id="exportBooks">0</b></div>
+    <div class="stat-line"><span>Страниц:</span><b id="exportPages">0</b></div>
+    <div class="stat-line"><span>Шаблонов:</span><b id="exportTemplates">0</b></div>
+    <div class="stat-line"><span>Примеров:</span><b id="exportExamples">0</b></div>
+  </div>
+  <div class="card">
+    <h2>🔄 Сохранение</h2>
+    <button class="btn" id="btnForceSave">💾 Сохранить</button>
+    <button class="btn danger" id="btnFullReset">💣 Очистить всё</button>
+  </div>
+</section>
+
+<section class="panel" id="panel-logs">
+  <div class="card">
+    <h2>📋 Лог</h2>
+    <div class="log" id="logOut">—</div>
+    <div class="row mt">
+      <button class="btn" id="btnClearLog">🗑</button>
+      <button class="btn" id="btnDiag">🔬 Диагностика</button>
+    </div>
+    <div class="code-out mt" id="diagOut" style="display:none">—</div>
+  </div>
+</section>
+
+</main>
+
+<div class="toast" id="toast">Готово</div>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.0/dist/transformers.min.js"></script>
+
+<script type="module">
+import * as pdfjsLib from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.mjs';
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.worker.min.mjs';
+window.pdfjsLib = pdfjsLib;
+window.dispatchEvent(new Event('pdfjs-ready'));
+</script>
+
+<script>
+'use strict';
+
+/* ============================================================
+   БАЗОВЫЕ УТИЛИТЫ
+   ============================================================ */
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+
+function toast(msg, ms = 2200) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => t.classList.remove('show'), ms);
+}
+
+function logMsg(msg) {
+  const el = $('#logOut');
+  if (!el) { console.log(msg); return; }
+  const t = new Date().toLocaleTimeString();
+  el.textContent += '[' + t + '] ' + msg + '\n';
+  el.scrollTop = el.scrollHeight;
+  const lines = el.textContent.split('\n');
+  if (lines.length > 800) el.textContent = lines.slice(-800).join('\n');
+  console.log(msg);
+}
+
+function downloadBlob(blob, name) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+function renderKatex(element, latex, displayMode = false) {
+  if (typeof katex === 'undefined') { element.textContent = latex; return; }
+  try {
+    katex.render(latex, element, {
+      throwOnError: false,
+      displayMode: displayMode,
+      output: 'html'
+    });
+  } catch (e) { element.textContent = latex; }
+}
+
+/* ============================================================
+   МАТЕМАТИКА
+   ============================================================ */
+function gcd(a, b) {
+  a = Math.abs(a); b = Math.abs(b);
+  while (b) { const t = b; b = a % b; a = t; }
+  return a || 1;
+}
+function lcm(a, b) { return Math.abs(a * b) / gcd(a, b); }
+function simplify(num, den) {
+  if (den === 0) throw new Error('Деление на ноль');
+  const sign = (num * den < 0) ? -1 : 1;
+  num = Math.abs(num); den = Math.abs(den);
+  const g = gcd(num, den);
+  return { num: sign * (num / g), den: den / g };
+}
+function fracToMixed(num, den) {
+  const sign = num < 0 ? '-' : '';
+  num = Math.abs(num);
+  if (num < den) return sign + num + '/' + den;
+  const whole = Math.floor(num / den);
+  const rem = num % den;
+  if (rem === 0) return sign + whole;
+  return sign + whole + ' ' + rem + '/' + den;
+}
+function round(n, d = 4) { const m = Math.pow(10, d); return Math.round(n * m) / m; }
+function fmtNum(n) { return Number.isInteger(n) ? String(n) : String(round(n, 4)); }
+
+/* ============================================================
+   НОРМАЛИЗАЦИЯ ВВОДА
+   ============================================================ */
+function normalizeInput(input) {
+  let t = input.trim();
+  t = t.replace(/[–—−]/g, '-');
+  t = t.replace(/×/g, '*').replace(/÷/g, '/');
+  t = t.replace(/²/g, '^2');
+  t = t.replace(/³/g, '^3');
+  t = t.replace(/√/g, 'sqrt');
+  t = t.replace(/\s*([+\-*/=])\s*/g, ' $1 ');
+  t = t.replace(/\s+/g, ' ');
+  return t;
+}
+
+/* ============================================================
+   ГЕОМЕТРИЧЕСКИЙ СПРАВОЧНИК
+   ============================================================ */
+const GEOMETRY_KNOWLEDGE = {
+  theorems: [
+    { id: 'pythagoras', name: 'Теорема Пифагора', statement: 'В прямоугольном треугольнике квадрат гипотенузы равен сумме квадратов катетов.', formula: 'c^2 = a^2 + b^2', keywords: ['пифагор', 'гипотенуза', 'катет'] },
+    { id: 'sum_angles', name: 'Сумма углов треугольника', statement: 'Сумма углов любого треугольника равна 180°.', formula: '\\angle A + \\angle B + \\angle C = 180°', keywords: ['сумма углов'] },
+    { id: 'sine_rule', name: 'Теорема синусов', statement: 'Стороны пропорциональны синусам противолежащих углов.', formula: '\\frac{a}{\\sin A} = \\frac{b}{\\sin B} = \\frac{c}{\\sin C} = 2R', keywords: ['синусов'] },
+    { id: 'cosine_rule', name: 'Теорема косинусов', statement: 'Квадрат стороны равен сумме квадратов двух других минус удвоенное произведение на косинус угла между ними.', formula: 'c^2 = a^2 + b^2 - 2ab \\cos C', keywords: ['косинусов'] },
+    { id: 'vieta', name: 'Теорема Виета', statement: 'Для x² + px + q = 0: сумма корней −p, произведение q.', formula: 'x_1 + x_2 = -p, \\quad x_1 x_2 = q', keywords: ['виет'] },
+    { id: 'inscribed_angle', name: 'Теорема о вписанном угле', statement: 'Вписанный угол равен половине центрального, опирающегося на ту же дугу.', formula: '\\angle_{впис} = \\frac{1}{2} \\angle_{центр}', keywords: ['вписанный угол'] },
+    { id: 'chord_product', name: 'Произведение отрезков хорд', statement: 'Если две хорды пересекаются, то произведение отрезков одной равно произведению отрезков другой.', formula: 'AE \\cdot BE = CE \\cdot DE', keywords: ['хорды'] },
+    { id: 'tangent_square', name: 'Квадрат касательной', statement: 'Квадрат отрезка касательной равен произведению отрезков секущей.', formula: 'AB^2 = AC \\cdot AD', keywords: ['касательная', 'секущая'] },
+    { id: 'median_intersection', name: 'Медианы треугольника', statement: 'Медианы пересекаются в одной точке и делятся в отношении 2:1, считая от вершины.', formula: 'AO : OA_1 = 2 : 1', keywords: ['медианы'] },
+    { id: 'thales', name: 'Теорема Фалеса', statement: 'Равные отрезки на одной стороне угла отсекают равные отрезки на другой стороне.', formula: 'AB = BC \\Rightarrow A_1B_1 = B_1C_1', keywords: ['фалес'] },
+    { id: 'similar_triangles_area', name: 'Отношение площадей подобных', statement: 'Отношение площадей подобных треугольников равно квадрату коэффициента подобия.', formula: '\\frac{S_1}{S_2} = k^2', keywords: ['подобие'] },
+    { id: 'exterior_angle', name: 'Внешний угол треугольника', statement: 'Внешний угол равен сумме двух внутренних, не смежных с ним.', formula: '\\angle 4 = \\angle 1 + \\angle 2', keywords: ['внешний угол'] }
+  ],
+  figures: {
+    parallelogram: { name: 'Параллелограмм', definition: 'Четырёхугольник, у которого противоположные стороны попарно параллельны.', properties: ['Противоположные стороны равны', 'Противоположные углы равны', 'Диагонали делятся пополам точкой пересечения', 'Сумма углов при одной стороне = 180°'], signs: ['Две стороны равны и параллельны', 'Противоположные стороны попарно равны', 'Диагонали делятся пополам'] },
+    rectangle: { name: 'Прямоугольник', definition: 'Параллелограмм с прямыми углами.', properties: ['Все свойства параллелограмма', 'Диагонали равны'], signs: ['В параллелограмме диагонали равны'] },
+    rhombus: { name: 'Ромб', definition: 'Параллелограмм с равными сторонами.', properties: ['Все свойства параллелограмма', 'Диагонали взаимно перпендикулярны', 'Диагонали делят углы пополам'] },
+    square: { name: 'Квадрат', definition: 'Прямоугольник с равными сторонами.', properties: ['Все свойства прямоугольника и ромба'] },
+    trapezoid: { name: 'Трапеция', definition: 'Четырёхугольник с двумя параллельными сторонами.', properties: ['Средняя линия параллельна основаниям и равна их полусумме'] },
+    circle: { name: 'Окружность', definition: 'Множество точек, равноудалённых от центра.', properties: ['Касательная перпендикулярна радиусу', 'Отрезки касательных из одной точки равны', 'Вписанный угол = половина центрального'] },
+    triangle: { name: 'Треугольник', definition: 'Фигура из трёх точек и отрезков между ними.', properties: ['Сумма углов = 180°', 'Против большей стороны больший угол', 'Каждая сторона меньше суммы двух других', 'Медианы пересекаются 2:1', 'Биссектрисы, высоты, серединные перпендикуляры пересекаются в одной точке'] }
+  },
+  formulas: [
+    { name: 'Площадь квадрата', formula: 'S = a^2' },
+    { name: 'Площадь прямоугольника', formula: 'S = ab' },
+    { name: 'Площадь параллелограмма', formula: 'S = a \\cdot h_a' },
+    { name: 'Площадь треугольника', formula: 'S = \\frac{1}{2} a h_a' },
+    { name: 'Площадь треугольника через синус', formula: 'S = \\frac{1}{2} ab \\sin C' },
+    { name: 'Формула Герона', formula: 'S = \\sqrt{p(p-a)(p-b)(p-c)}' },
+    { name: 'Площадь трапеции', formula: 'S = \\frac{a + b}{2} \\cdot h' },
+    { name: 'Площадь круга', formula: 'S = \\pi R^2' },
+    { name: 'Площадь ромба', formula: 'S = \\frac{1}{2} d_1 d_2' },
+    { name: 'Площадь сектора', formula: 'S = \\frac{\\pi R^2 \\alpha}{360°}' },
+    { name: 'Длина окружности', formula: 'C = 2\\pi R' },
+    { name: 'Длина дуги', formula: 'l = \\frac{\\pi R \\alpha}{180°}' }
+  ],
+  trig: [
+    { angle: '30°', sin: '\\frac{1}{2}', cos: '\\frac{\\sqrt{3}}{2}', tg: '\\frac{\\sqrt{3}}{3}' },
+    { angle: '45°', sin: '\\frac{\\sqrt{2}}{2}', cos: '\\frac{\\sqrt{2}}{2}', tg: '1' },
+    { angle: '60°', sin: '\\frac{\\sqrt{3}}{2}', cos: '\\frac{1}{2}', tg: '\\sqrt{3}' },
+    { angle: '0°', sin: '0', cos: '1', tg: '0' },
+    { angle: '90°', sin: '1', cos: '0', tg: '—' },
+    { angle: '120°', sin: '\\frac{\\sqrt{3}}{2}', cos: '-\\frac{1}{2}', tg: '-\\sqrt{3}' },
+    { angle: '135°', sin: '\\frac{\\sqrt{2}}{2}', cos: '-\\frac{\\sqrt{2}}{2}', tg: '-1' },
+    { angle: '150°', sin: '\\frac{1}{2}', cos: '-\\frac{\\sqrt{3}}{2}', tg: '-\\frac{\\sqrt{3}}{3}' },
+    { angle: '180°', sin: '0', cos: '-1', tg: '0' }
+  ],
+  trigIdentity: 'sin^2 \\alpha + cos^2 \\alpha = 1',
+  vectors: [
+    { name: 'Длина вектора', formula: '|a| = \\sqrt{x^2 + y^2}' },
+    { name: 'Скалярное произведение через координаты', formula: 'a \\cdot b = x_1 x_2 + y_1 y_2' },
+    { name: 'Скалярное произведение через угол', formula: 'a \\cdot b = |a| |b| \\cos \\alpha' },
+    { name: 'Перпендикулярность', formula: 'x_1 x_2 + y_1 y_2 = 0' },
+    { name: 'Середина отрезка', formula: 'M\\left(\\frac{x_1 + x_2}{2}; \\frac{y_1 + y_2}{2}\\right)' },
+    { name: 'Расстояние между точками', formula: 'd = \\sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}' },
+    { name: 'Уравнение окружности', formula: '(x - x_0)^2 + (y - y_0)^2 = R^2' },
+    { name: 'Уравнение прямой', formula: 'ax + by + c = 0' }
+  ]
+};
+
+/* ============================================================
+   ПРАВИЛА РЕШАТЕЛЯ
+   ============================================================ */
+const RULES = {
+  fraction_add: { name: 'Сложение дробей', solve: (t) => {
+    const m = t.match(/(\d+)\s*\/\s*(\d+)\s*\+\s*(\d+)\s*\/\s*(\d+)/);
+    if (!m) return null;
+    const [a,b,c,d] = [+m[1],+m[2],+m[3],+m[4]];
+    const l = lcm(b, d);
+    const a1 = a * (l/b), c1 = c * (l/d);
+    const s = a1 + c1;
+    const r = simplify(s, l);
+    return {
+      steps: [
+        { text: 'Общий знаменатель:', latex: `\\text{НОК}(${b}, ${d}) = ${l}` },
+        { text: 'Доп. множители:', latex: `${l} \\div ${b} = ${l/b}, \\quad ${l} \\div ${d} = ${l/d}` },
+        { text: 'Складываем:', latex: `\\frac{${a1} + ${c1}}{${l}} = \\frac{${s}}{${l}} = \\frac{${r.num}}{${r.den}}` }
+      ],
+      answerLatex: `\\frac{${r.num}}{${r.den}}`,
+      answer: fracToMixed(r.num, r.den)
+    };
+  }},
+  fraction_sub: { name: 'Вычитание дробей', solve: (t) => {
+    const m = t.match(/(\d+)\s*\/\s*(\d+)\s*-\s*(\d+)\s*\/\s*(\d+)/);
+    if (!m) return null;
+    const [a,b,c,d] = [+m[1],+m[2],+m[3],+m[4]];
+    const l = lcm(b, d);
+    const a1 = a * (l/b), c1 = c * (l/d);
+    const s = a1 - c1;
+    const r = simplify(s, l);
+    return {
+      steps: [
+        { text: 'НОК:', latex: `${l}` },
+        { text: 'Вычитаем:', latex: `\\frac{${a1} - ${c1}}{${l}} = \\frac{${s}}{${l}} = \\frac{${r.num}}{${r.den}}` }
+      ],
+      answerLatex: `\\frac{${r.num}}{${r.den}}`,
+      answer: fracToMixed(r.num, r.den)
+    };
+  }},
+  fraction_mul: { name: 'Умножение дробей', solve: (t) => {
+    const m = t.match(/(\d+)\s*\/\s*(\d+)\s*[×*x]\s*(\d+)\s*\/\s*(\d+)/);
+    if (!m) return null;
+    const [a,b,c,d] = [+m[1],+m[2],+m[3],+m[4]];
+    const num = a*c, den = b*d;
+    const r = simplify(num, den);
+    return {
+      steps: [{ text: 'Умножаем:', latex: `\\frac{${a} \\cdot ${c}}{${b} \\cdot ${d}} = \\frac{${num}}{${den}} = \\frac{${r.num}}{${r.den}}` }],
+      answerLatex: `\\frac{${r.num}}{${r.den}}`,
+      answer: fracToMixed(r.num, r.den)
+    };
+  }},
+  fraction_div: { name: 'Деление дробей', solve: (t) => {
+    const m = t.match(/(\d+)\s*\/\s*(\d+)\s*[÷:]\s*(\d+)\s*\/\s*(\d+)/);
+    if (!m) return null;
+    const [a,b,c,d] = [+m[1],+m[2],+m[3],+m[4]];
+    const num = a*d, den = b*c;
+    const r = simplify(num, den);
+    return {
+      steps: [{ text: 'Умножаем на обратную:', latex: `\\frac{${a}}{${b}} \\cdot \\frac{${d}}{${c}} = \\frac{${num}}{${den}} = \\frac{${r.num}}{${r.den}}` }],
+      answerLatex: `\\frac{${r.num}}{${r.den}}`,
+      answer: fracToMixed(r.num, r.den)
+    };
+  }},
+  fraction_simplify: { name: 'Сокращение', solve: (t) => {
+    if (!/сократить?/i.test(t)) return null;
+    const m = t.match(/(\d+)\s*\/\s*(\d+)/);
+    if (!m) return null;
+    const [num, den] = [+m[1], +m[2]];
+    const g = gcd(num, den);
+    const r = simplify(num, den);
+    return {
+      steps: [
+        { text: 'НОД:', latex: `${g}` },
+        { text: 'Делим:', latex: `\\frac{${num} \\div ${g}}{${den} \\div ${g}} = \\frac{${r.num}}{${r.den}}` }
+      ],
+      answerLatex: `\\frac{${r.num}}{${r.den}}`,
+      answer: r.num + '/' + r.den
+    };
+  }},
+  percent_of: { name: 'Процент от числа', solve: (t) => {
+    const m = t.match(/(\d+(?:[.,]\d+)?)\s*%\s*(?:от\s+)?(\d+(?:[.,]\d+)?)/i);
+    if (!m) return null;
+    const p = parseFloat(m[1].replace(',', '.')), n = parseFloat(m[2].replace(',', '.'));
+    const r = p * n / 100;
+    return {
+      steps: [{ text: 'Процент = сотая часть:', latex: `${n} \\cdot \\frac{${p}}{100} = ${fmtNum(r)}` }],
+      answerLatex: String(fmtNum(r)),
+      answer: fmtNum(r)
+    };
+  }},
+  linear_eq: { name: 'Линейное уравнение', solve: (t) => {
+    const m = t.match(/(-?\d+(?:[.,]\d+)?)\s*\*?\s*x\s*([+\-])\s*(\d+(?:[.,]\d+)?)\s*=\s*(-?\d+(?:[.,]\d+)?)/i);
+    if (m) {
+      const a = parseFloat(m[1].replace(',', '.'));
+      const sign = m[2];
+      const b = parseFloat(m[3].replace(',', '.'));
+      const c = parseFloat(m[4].replace(',', '.'));
+      const bS = sign === '+' ? b : -b;
+      const x = (c - bS) / a;
+      return {
+        steps: [
+          { text: 'Переносим:', latex: `${a}x = ${c} ${sign === '+' ? '-' : '+'} ${b} = ${fmtNum(c-bS)}` },
+          { text: 'Делим:', latex: `x = \\frac{${fmtNum(c-bS)}}{${a}} = ${fmtNum(x)}` }
+        ],
+        answerLatex: `x = ${fmtNum(x)}`,
+        answer: 'x = ' + fmtNum(x)
+      };
+    }
+    return null;
+  }},
+  quadratic: { name: 'Квадратное уравнение', solve: (t) => {
+    const m = t.match(/(-?\d*)\s*x\s*[²^]\s*2?\s*([+\-]\s*\d*)\s*x\s*([+\-]\s*\d+)\s*=\s*0/i);
+    if (m) {
+      const a = (m[1] === '' || m[1] === '-') ? (m[1] === '-' ? -1 : 1) : +m[1];
+      const rest = m[2].replace(/\s/g, '');
+      const bM = rest.match(/([+\-])(\d*)x/);
+      if (!bM) return null;
+      const bR = bM[2] === '' ? 1 : +bM[2];
+      const b = bM[1] === '+' ? bR : -bR;
+      const cPart = rest.substring(bM.index + bM[0].length);
+      const cM = cPart.match(/([+\-])(\d+)/);
+      if (!cM) return null;
+      const c = cM[1] === '+' ? +cM[2] : -+cM[2];
+      return solveQuadraticLatex(a, b, c);
+    }
+    return null;
+  }},
+  discriminant: { name: 'Дискриминант', solve: (t) => {
+    if (!/дискриминант/i.test(t)) return null;
+    const nums = t.match(/-?\d+/g);
+    if (!nums || nums.length < 3) return null;
+    const a = +nums[0], b = +nums[1], c = +nums[2];
+    const D = b*b - 4*a*c;
+    return {
+      steps: [
+        { text: 'Коэффициенты:', latex: `a = ${a}, b = ${b}, c = ${c}` },
+        { text: 'Формула:', latex: `D = b^2 - 4ac = ${b*b} - ${4*a*c} = ${D}` }
+      ],
+      answerLatex: `D = ${D}`,
+      answer: 'D = ' + D
+    };
+  }},
+  vieta: { name: 'Теорема Виета', solve: (t) => {
+    if (!/виет/i.test(t)) return null;
+    const m = t.match(/x\s*[²^]\s*2?\s*([+\-]\s*\d*)\s*x\s*([+\-]\s*\d+)/i);
+    if (!m) return null;
+    const rest = m[1].replace(/\s/g, '');
+    const bM = rest.match(/([+\-])(\d*)/);
+    const b = bM[1] === '+' ? (bM[2] === '' ? 1 : +bM[2]) : -(bM[2] === '' ? 1 : +bM[2]);
+    const cStr = m[2].replace(/\s/g, '');
+    const c = cStr[0] === '+' ? +cStr.substring(1) : -+cStr.substring(1);
+    return {
+      steps: [
+        { text: 'p и q:', latex: `p = ${b}, q = ${c}` },
+        { text: 'Сумма корней:', latex: `x_1 + x_2 = -p = ${-b}` },
+        { text: 'Произведение:', latex: `x_1 x_2 = q = ${c}` }
+      ],
+      answerLatex: `x_1 + x_2 = ${-b}, \\quad x_1 x_2 = ${c}`,
+      answer: `сумма = ${-b}, произведение = ${c}`
+    };
+  }},
+  pythagoras: { name: 'Теорема Пифагора', solve: (t) => {
+    const lower = t.toLowerCase();
+    if (!lower.includes('пифагор') && !lower.includes('гипотенуз')) return null;
+    const nums = t.match(/(\d+(?:[.,]\d+)?)/g);
+    if (!nums || nums.length < 2) return null;
+    const a = parseFloat(nums[0].replace(',', '.'));
+    const b = parseFloat(nums[1].replace(',', '.'));
+    const c = Math.sqrt(a*a + b*b);
+    return {
+      steps: [
+        { text: 'Формула:', latex: 'c^2 = a^2 + b^2' },
+        { text: 'Подставляем:', latex: `c^2 = ${a}^2 + ${b}^2 = ${a*a} + ${b*b} = ${a*a+b*b}` },
+        { text: 'Корень:', latex: `c = \\sqrt{${a*a+b*b}} \\approx ${fmtNum(c)}` }
+      ],
+      answerLatex: `c \\approx ${fmtNum(c)}`,
+      answer: 'c ≈ ' + fmtNum(c)
+    };
+  }},
+  triangle_area_by_sides: { name: 'Площадь треугольника (Герон)', solve: (t) => {
+    const lower = t.toLowerCase();
+    if (!lower.includes('площад') || !lower.includes('треугольник')) return null;
+    if (lower.includes('высот') || lower.includes('основан')) return null;
+    const nums = t.match(/(\d+(?:[.,]\d+)?)/g);
+    if (!nums || nums.length < 3) return null;
+    const a = parseFloat(nums[0].replace(',', '.'));
+    const b = parseFloat(nums[1].replace(',', '.'));
+    const c = parseFloat(nums[2].replace(',', '.'));
+    if (a + b <= c || a + c <= b || b + c <= a) return null;
+    const p = (a + b + c) / 2;
+    const s = Math.sqrt(p * (p-a) * (p-b) * (p-c));
+    return {
+      steps: [
+        { text: 'Полупериметр:', latex: `p = \\frac{${a}+${b}+${c}}{2} = ${fmtNum(p)}` },
+        { text: 'Формула Герона:', latex: 'S = \\sqrt{p(p-a)(p-b)(p-c)}' },
+        { text: 'Вычисляем:', latex: `S \\approx ${fmtNum(s)}` }
+      ],
+      answerLatex: `S \\approx ${fmtNum(s)}`,
+      answer: 'S ≈ ' + fmtNum(s)
+    };
+  }},
+  circle_area: { name: 'Площадь круга', solve: (t) => {
+    if (!/площад.*круг/i.test(t)) return null;
+    const nums = t.match(/(\d+(?:[.,]\d+)?)/g);
+    if (!nums) return null;
+    const r = parseFloat(nums[0].replace(',', '.'));
+    const s = Math.PI * r * r;
+    return {
+      steps: [{ text: 'Формула:', latex: 'S = \\pi r^2' }, { text: 'Подставляем:', latex: `S = \\pi \\cdot ${r}^2 \\approx ${fmtNum(s)}` }],
+      answerLatex: `S \\approx ${fmtNum(s)}`,
+      answer: 'S ≈ ' + fmtNum(s)
+    };
+  }},
+  circle_circumference: { name: 'Длина окружности', solve: (t) => {
+    if (!/длина окружност|периметр круг/i.test(t)) return null;
+    const nums = t.match(/(\d+(?:[.,]\d+)?)/g);
+    if (!nums) return null;
+    const r = parseFloat(nums[0].replace(',', '.'));
+    const c = 2 * Math.PI * r;
+    return {
+      steps: [{ text: 'Формула:', latex: 'C = 2\\pi r' }, { text: 'Подставляем:', latex: `C = 2 \\pi \\cdot ${r} \\approx ${fmtNum(c)}` }],
+      answerLatex: `C \\approx ${fmtNum(c)}`,
+      answer: 'C ≈ ' + fmtNum(c)
+    };
+  }},
+  circle_sector: { name: 'Площадь сектора', solve: (t) => {
+    if (!/сектор/i.test(t)) return null;
+    const nums = t.match(/(\d+(?:[.,]\d+)?)/g);
+    if (!nums || nums.length < 2) return null;
+    const R = parseFloat(nums[0].replace(',', '.'));
+    const alpha = parseFloat(nums[1].replace(',', '.'));
+    const s = Math.PI * R * R * alpha / 360;
+    return {
+      steps: [
+        { text: 'Формула:', latex: 'S = \\frac{\\pi R^2 \\alpha}{360°}' },
+        { text: 'Вычисляем:', latex: `S \\approx ${fmtNum(s)}` }
+      ],
+      answerLatex: `S \\approx ${fmtNum(s)}`,
+      answer: 'S ≈ ' + fmtNum(s)
+    };
+  }},
+  square_area: { name: 'Площадь квадрата', solve: (t) => {
+    if (!/площад.*квадрат/i.test(t)) return null;
+    const nums = t.match(/(\d+(?:[.,]\d+)?)/g);
+    if (!nums) return null;
+    const a = parseFloat(nums[0].replace(',', '.'));
+    return { steps: [{ text: 'Формула:', latex: 'S = a^2' }, { text: 'Подставляем:', latex: `S = ${a}^2 = ${fmtNum(a*a)}` }], answerLatex: `S = ${fmtNum(a*a)}`, answer: 'S = ' + fmtNum(a*a) };
+  }},
+  square_perimeter: { name: 'Периметр квадрата', solve: (t) => {
+    if (!/периметр.*квадрат/i.test(t)) return null;
+    const nums = t.match(/(\d+(?:[.,]\d+)?)/g);
+    if (!nums) return null;
+    const a = parseFloat(nums[0].replace(',', '.'));
+    return { steps: [{ text: 'P = 4a', latex: `P = 4 \\cdot ${a} = ${fmtNum(4*a)}` }], answerLatex: `P = ${fmtNum(4*a)}`, answer: 'P = ' + fmtNum(4*a) };
+  }},
+  rectangle_area: { name: 'Площадь прямоугольника', solve: (t) => {
+    if (!/площад.*прямоугольник/i.test(t)) return null;
+    const nums = t.match(/(\d+(?:[.,]\d+)?)/g);
+    if (!nums || nums.length < 2) return null;
+    const a = parseFloat(nums[0].replace(',', '.'));
+    const b = parseFloat(nums[1].replace(',', '.'));
+    return { steps: [{ text: 'S = ab', latex: `S = ${a} \\cdot ${b} = ${fmtNum(a*b)}` }], answerLatex: `S = ${fmtNum(a*b)}`, answer: 'S = ' + fmtNum(a*b) };
+  }},
+  rectangle_perimeter: { name: 'Периметр прямоугольника', solve: (t) => {
+    if (!/периметр.*прямоугольник/i.test(t)) return null;
+    const nums = t.match(/(\d+(?:[.,]\d+)?)/g);
+    if (!nums || nums.length < 2) return null;
+    const a = parseFloat(nums[0].replace(',', '.'));
+    const b = parseFloat(nums[1].replace(',', '.'));
+    return { steps: [{ text: 'P = 2(a+b)', latex: `P = 2(${a}+${b}) = ${fmtNum(2*(a+b))}` }], answerLatex: `P = ${fmtNum(2*(a+b))}`, answer: 'P = ' + fmtNum(2*(a+b)) };
+  }},
+  rectangle_diagonal: { name: 'Диагональ прямоугольника', solve: (t) => {
+    if (!/диагонал.*прямоугольник/i.test(t)) return null;
+    const nums = t.match(/(\d+(?:[.,]\d+)?)/g);
+    if (!nums || nums.length < 2) return null;
+    const a = parseFloat(nums[0].replace(',', '.'));
+    const b = parseFloat(nums[1].replace(',', '.'));
+    const d = Math.sqrt(a*a + b*b);
+    return { steps: [{ text: 'Пифагор:', latex: `d = \\sqrt{${a}^2 + ${b}^2} \\approx ${fmtNum(d)}` }], answerLatex: `d \\approx ${fmtNum(d)}`, answer: 'd ≈ ' + fmtNum(d) };
+  }},
+  triangle_area: { name: 'Площадь треугольника (a·h/2)', solve: (t) => {
+    if (!/площад.*треугольник/i.test(t)) return null;
+    if (t.match(/(\d+)\s+и\s+(\d+)\s+и\s+(\d+)/)) return null;
+    const nums = t.match(/(\d+(?:[.,]\d+)?)/g);
+    if (!nums || nums.length < 2) return null;
+    const a = parseFloat(nums[0].replace(',', '.'));
+    const h = parseFloat(nums[1].replace(',', '.'));
+    const s = 0.5 * a * h;
+    return { steps: [{ text: 'S = ½ah', latex: `S = \\frac{1}{2} \\cdot ${a} \\cdot ${h} = ${fmtNum(s)}` }], answerLatex: `S = ${fmtNum(s)}`, answer: 'S = ' + fmtNum(s) };
+  }},
+  trapezoid_area: { name: 'Площадь трапеции', solve: (t) => {
+    if (!/площад.*трапец/i.test(t)) return null;
+    const nums = t.match(/(\d+(?:[.,]\d+)?)/g);
+    if (!nums || nums.length < 3) return null;
+    const a = parseFloat(nums[0].replace(',', '.'));
+    const b = parseFloat(nums[1].replace(',', '.'));
+    const h = parseFloat(nums[2].replace(',', '.'));
+    const s = (a + b) / 2 * h;
+    return { steps: [{ text: 'S = (a+b)h/2', latex: `S = \\frac{${a}+${b}}{2} \\cdot ${h} = ${fmtNum(s)}` }], answerLatex: `S = ${fmtNum(s)}`, answer: 'S = ' + fmtNum(s) };
+  }},
+  parallelogram_area: { name: 'Площадь параллелограмма', solve: (t) => {
+    if (!/площад.*параллелограмм/i.test(t)) return null;
+    const nums = t.match(/(\d+(?:[.,]\d+)?)/g);
+    if (!nums || nums.length < 2) return null;
+    const a = parseFloat(nums[0].replace(',', '.'));
+    const h = parseFloat(nums[1].replace(',', '.'));
+    const s = a * h;
+    return { steps: [{ text: 'S = ah', latex: `S = ${a} \\cdot ${h} = ${fmtNum(s)}` }], answerLatex: `S = ${fmtNum(s)}`, answer: 'S = ' + fmtNum(s) };
+  }},
+  rhombus_area: { name: 'Площадь ромба', solve: (t) => {
+    if (!/площад.*ромб/i.test(t)) return null;
+    const nums = t.match(/(\d+(?:[.,]\d+)?)/g);
+    if (!nums || nums.length < 2) return null;
+    const d1 = parseFloat(nums[0].replace(',', '.'));
+    const d2 = parseFloat(nums[1].replace(',', '.'));
+    const s = 0.5 * d1 * d2;
+    return { steps: [{ text: 'S = ½d₁d₂', latex: `S = \\frac{1}{2} \\cdot ${d1} \\cdot ${d2} = ${fmtNum(s)}` }], answerLatex: `S = ${fmtNum(s)}`, answer: 'S = ' + fmtNum(s) };
+  }},
+  cube_volume: { name: 'Объём куба', solve: (t) => {
+    if (!/объ[её]м.*куб/i.test(t)) return null;
+    const nums = t.match(/(\d+(?:[.,]\d+)?)/g);
+    if (!nums) return null;
+    const a = parseFloat(nums[0].replace(',', '.'));
+    return { steps: [{ text: 'V = a³', latex: `V = ${a}^3 = ${fmtNum(a*a*a)}` }], answerLatex: `V = ${fmtNum(a*a*a)}`, answer: 'V = ' + fmtNum(a*a*a) };
+  }},
+  distance_points: { name: 'Расстояние между точками', solve: (t) => {
+    const matches = [...t.matchAll(/[A-ZА-Я]\s*\(\s*(-?\d+(?:[.,]\d+)?)\s*[;:,]\s*(-?\d+(?:[.,]\d+)?)\s*\)/g)];
+    if (matches.length < 2) return null;
+    if (!/расстоян/i.test(t) && !/найти|найди|вычисли/i.test(t)) return null;
+    const x1 = parseFloat(matches[0][1].replace(',', '.'));
+    const y1 = parseFloat(matches[0][2].replace(',', '.'));
+    const x2 = parseFloat(matches[1][1].replace(',', '.'));
+    const y2 = parseFloat(matches[1][2].replace(',', '.'));
+    const d = Math.sqrt((x2-x1)**2 + (y2-y1)**2);
+    return {
+      steps: [
+        { text: 'Формула:', latex: 'd = \\sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}' },
+        { text: 'Подставляем:', latex: `d = \\sqrt{(${x2} - (${x1}))^2 + (${y2} - (${y1}))^2}` },
+        { text: 'Вычисляем:', latex: `d = \\sqrt{${(x2-x1)**2} + ${(y2-y1)**2}} \\approx ${fmtNum(d)}` }
+      ],
+      answerLatex: `d \\approx ${fmtNum(d)}`,
+      answer: 'd ≈ ' + fmtNum(d)
+    };
+  }},
+  midpoint: { name: 'Середина отрезка', solve: (t) => {
+    const matches = [...t.matchAll(/[A-ZА-Я]\s*\(\s*(-?\d+(?:[.,]\d+)?)\s*[;:,]\s*(-?\d+(?:[.,]\d+)?)\s*\)/g)];
+    if (matches.length < 2) return null;
+    if (!/середин/i.test(t)) return null;
+    const x1 = parseFloat(matches[0][1].replace(',', '.'));
+    const y1 = parseFloat(matches[0][2].replace(',', '.'));
+    const x2 = parseFloat(matches[1][1].replace(',', '.'));
+    const y2 = parseFloat(matches[1][2].replace(',', '.'));
+    const mx = (x1 + x2) / 2;
+    const my = (y1 + y2) / 2;
+    return {
+      steps: [
+        { text: 'Формула:', latex: 'M\\left(\\frac{x_1+x_2}{2}; \\frac{y_1+y_2}{2}\\right)' },
+        { text: 'Считаем:', latex: `M(${fmtNum(mx)}; ${fmtNum(my)})` }
+      ],
+      answerLatex: `M(${fmtNum(mx)}; ${fmtNum(my)})`,
+      answer: `M(${fmtNum(mx)}; ${fmtNum(my)})`
+    };
+  }},
+  scalar_product: { name: 'Скалярное произведение', solve: (t) => {
+    const lower = t.toLowerCase();
+    if (!lower.includes('скалярн') && !(lower.includes('вектор') && lower.includes('умнож'))) return null;
+    const matches = [...t.matchAll(/\{?\s*(-?\d+(?:[.,]\d+)?)\s*[;:,]\s*(-?\d+(?:[.,]\d+)?)\s*\}?/g)];
+    if (matches.length < 2) return null;
+    const x1 = parseFloat(matches[0][1].replace(',', '.'));
+    const y1 = parseFloat(matches[0][2].replace(',', '.'));
+    const x2 = parseFloat(matches[1][1].replace(',', '.'));
+    const y2 = parseFloat(matches[1][2].replace(',', '.'));
+    const dot = x1*x2 + y1*y2;
+    return {
+      steps: [
+        { text: 'Формула:', latex: 'a \\cdot b = x_1 x_2 + y_1 y_2' },
+        { text: 'Подставляем:', latex: `a \\cdot b = ${x1} \\cdot ${x2} + ${y1} \\cdot ${y2} = ${dot}` }
+      ],
+      answerLatex: `a \\cdot b = ${dot}`,
+      answer: 'a · b = ' + dot
+    };
+  }}
+};
+
+function solveQuadraticLatex(a, b, c) {
+  const D = b*b - 4*a*c;
+  const steps = [
+    { text: 'Коэффициенты:', latex: `a = ${a}, b = ${b}, c = ${c}` },
+    { text: 'Дискриминант:', latex: `D = ${b*b} - ${4*a*c} = ${D}` }
+  ];
+  if (D < 0) {
+    steps.push({ text: 'D < 0 — корней нет', latex: 'D < 0' });
+    return { steps, answerLatex: '\\text{Корней нет}', answer: 'Корней нет' };
+  }
+  if (D === 0) {
+    const x = -b / (2*a);
+    steps.push({ text: 'D = 0 — один корень:', latex: `x = ${fmtNum(x)}` });
+    return { steps, answerLatex: `x = ${fmtNum(x)}`, answer: 'x = ' + fmtNum(x) };
+  }
+  const sqD = Math.sqrt(D);
+  const x1 = (-b + sqD) / (2*a);
+  const x2 = (-b - sqD) / (2*a);
+  steps.push({ text: 'D > 0 — два корня:', latex: `x_{1,2} = \\frac{${-b} \\pm ${fmtNum(sqD)}}{${2*a}}` });
+  steps.push({ text: 'x₁:', latex: `${fmtNum(x1)}` });
+  steps.push({ text: 'x₂:', latex: `${fmtNum(x2)}` });
+  return { steps, answerLatex: `x_1 = ${fmtNum(x1)}, \\quad x_2 = ${fmtNum(x2)}`, answer: `x₁ = ${fmtNum(x1)}, x₂ = ${fmtNum(x2)}` };
+}
+
+function detectAndSolve(input) {
+  const t = input.trim();
+  if (!t) return null;
+  const order = [
+    'discriminant', 'vieta', 'quadratic', 'linear_eq',
+    'fraction_add', 'fraction_sub', 'fraction_mul', 'fraction_div',
+    'fraction_simplify', 'percent_of',
+    'pythagoras', 'circle_area', 'circle_circumference', 'circle_sector',
+    'square_area', 'square_perimeter',
+    'rectangle_area', 'rectangle_perimeter', 'rectangle_diagonal',
+    'triangle_area', 'triangle_area_by_sides',
+    'trapezoid_area', 'parallelogram_area', 'rhombus_area', 'cube_volume',
+    'distance_points', 'midpoint', 'scalar_product'
+  ];
+  for (const key of order) {
+    const rule = RULES[key];
+    if (!rule || !rule.solve) continue;
+    try {
+      const r = rule.solve(t);
+      if (r) return { ruleName: rule.name, ruleKey: key, ...r };
+    } catch (e) {}
+  }
+  return null;
+}
+
+/* ============================================================
+   БАЗА ДАННЫХ
+   ============================================================ */
+const DB_NAME = 'mathsolver8_geom';
+const DB_VERSION = 3;
+let db = null;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains('books')) d.createObjectStore('books', { keyPath: 'id' });
+      if (!d.objectStoreNames.contains('pages')) {
+        const s = d.createObjectStore('pages', { keyPath: 'id' });
+        s.createIndex('bookId', 'bookId');
+      }
+      if (!d.objectStoreNames.contains('templates')) {
+        const s = d.createObjectStore('templates', { keyPath: 'id' });
+        s.createIndex('bookId', 'bookId');
+      }
+      if (!d.objectStoreNames.contains('examples')) d.createObjectStore('examples', { keyPath: 'id' });
+      if (!d.objectStoreNames.contains('classifier')) d.createObjectStore('classifier', { keyPath: 'key' });
+      if (!d.objectStoreNames.contains('dataset')) d.createObjectStore('dataset', { keyPath: 'id' });
+      if (!d.objectStoreNames.contains('chat')) d.createObjectStore('chat', { keyPath: 'id' });
+    };
+    req.onsuccess = () => { db = req.result; resolve(db); };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function idbPut(store, v) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, 'readwrite');
+    const r = tx.objectStore(store).put(v);
+    r.onsuccess = () => resolve(r.result);
+    r.onerror = () => reject(r.error);
+  });
+}
+function idbGet(store, key) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, 'readonly');
+    const r = tx.objectStore(store).get(key);
+    r.onsuccess = () => resolve(r.result);
+    r.onerror = () => reject(r.error);
+  });
+}
+function idbGetAll(store) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, 'readonly');
+    const r = tx.objectStore(store).getAll();
+    r.onsuccess = () => resolve(r.result);
+    r.onerror = () => reject(r.error);
+  });
+}
+function idbDelete(store, key) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, 'readwrite');
+    const r = tx.objectStore(store).delete(key);
+    r.onsuccess = () => resolve();
+    r.onerror = () => reject(r.error);
+  });
+}
+function idbClear(store) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, 'readwrite');
+    const r = tx.objectStore(store).clear();
+    r.onsuccess = () => resolve();
+    r.onerror = () => reject(r.error);
+  });
+}
+
+/* ============================================================
+   ДЕТЕКТОР БИТОГО ТЕКСТА
+   ============================================================ */
+const BROKEN_TEXT_PATTERNS = [
+  /^[\d\s.,;:]+$/,
+  /\b(?:1\s+){10,}/,
+  /\b\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+/,
+  /[a-z]{3,}[A-Z]{3,}/,
+  /[а-я]{3,}[А-Я]{3,}/
+];
+
+function isBrokenPdfText(text) {
+  if (!text || text.length < 5) return true;
+  for (const pat of BROKEN_TEXT_PATTERNS) {
+    if (pat.test(text)) return true;
+  }
+  const cyrillic = (text.match(/[а-яА-Я]/g) || []).length;
+  const latin = (text.match(/[a-zA-Z]/g) || []).length;
+  const digits = (text.match(/\d/g) || []).length;
+  const total = text.length;
+  if (total < 10) return true;
+  if (latin > cyrillic && cyrillic < 5) return true;
+  if (digits / total > 0.4) return true;
+  const words = text.split(/\s+/).filter(w => w.length > 0);
+  if (words.length > 5) {
+    const shortWords = words.filter(w => w.length <= 2).length;
+    if (shortWords / words.length > 0.6) return true;
+  }
+  return false;
+}
+
+/* ============================================================
+   ЧИСТКА PDF ТЕКСТА
+   ============================================================ */
+const TASK_KEYWORDS = [
+  'найдите', 'найти', 'решите', 'решить', 'вычислите', 'вычислить',
+  'сократите', 'сократить', 'упростите', 'упростить', 'докажите',
+  'доказать', 'постройте', 'построить', 'сравните', 'сравнить',
+  'представьте', 'представить', 'преобразуйте', 'преобразовать',
+  'разложите', 'разложить', 'освободитесь', 'внесите', 'вынесите',
+  'приведите', 'привести', 'определите', 'определить',
+  'площадь', 'периметр', 'объём', 'объем', 'гипотенуза', 'катет',
+  'дискриминант', 'теорема', 'корень', 'уравнение', 'неравенство',
+  'функция', 'график', 'дробь', 'выражение', 'многочлен',
+  'треугольник', 'прямоугольник', 'квадрат', 'круг', 'окружность',
+  'скорость', 'расстояние', 'время', 'масса', 'процент',
+  'сколько', 'чему', 'какова', 'каков', 'какие', 'какое',
+  'биссектриса', 'медиана', 'высота', 'параллелограмм', 'трапеция',
+  'ромб', 'вектор', 'координаты', 'синус', 'косинус', 'тангенс'
+];
+
+function hasTaskKeyword(text) {
+  const lower = text.toLowerCase();
+  return TASK_KEYWORDS.some(kw => lower.includes(kw));
+}
+
+function cleanPdfText(rawText) {
+  let t = rawText;
+  t = t.replace(/\r\n/g, '\n');
+  t = t.replace(/[ \t]+/g, ' ');
+  t = t.replace(/\n{3,}/g, '\n\n');
+  t = t.replace(/\u00AD/g, '');
+  t = t.replace(/\u200B/g, '');
+  t = t.replace(/\uFEFF/g, '');
+  t = t.replace(/[\u2018\u2019]/g, "'");
+  t = t.replace(/[\u201C\u201D]/g, '"');
+  t = t.replace(/([а-яА-Яa-zA-Z])\s+([а-яА-Яa-zA-Z]{1,3})\s+([а-яА-Яa-zA-Z]{3,})/g,
+    (m, a, b, c) => a + b + ' ' + c);
+  return t;
+}
+
+/* ============================================================
+   ИЗВЛЕЧЕНИЕ ШАБЛОНОВ
+   ============================================================ */
+function extractTemplates(text) {
+  const templates = [];
+  if (isBrokenPdfText(text)) return templates;
+
+  const BLACKLIST = new Set([
+    'fraction_add', 'fraction_sub', 'fraction_mul', 'fraction_div',
+    'fraction_simplify', 'percent_of'
+  ]);
+
+  const taskBlocks = text.split(/(?=(?:^|\n)\s*\d{1,3}\.\s)/);
+
+  for (const rawBlock of taskBlocks) {
+    const block = rawBlock.trim();
+    if (block.length < 15 || block.length > 400) continue;
+    if (!/[а-яА-Я]/.test(block)) continue;
+    if (isBrokenPdfText(block)) continue;
+    if (!hasTaskKeyword(block)) continue;
+
+    const sentences = block
+      .split(/[.!?](?:\s|$)/)
+      .map(s => s.trim())
+      .filter(s => s.length >= 15 && s.length <= 250);
+
+    for (const sentence of sentences) {
+      if (isBrokenPdfText(sentence)) continue;
+      if (!hasTaskKeyword(sentence)) continue;
+      for (const key of Object.keys(RULES)) {
+        if (BLACKLIST.has(key)) continue;
+        try {
+          const r = RULES[key].solve(sentence);
+          if (r) {
+            const already = templates.some(t =>
+              t.ruleKey === key && t.sample.substring(0, 50) === sentence.substring(0, 50)
+            );
+            if (!already) templates.push({ ruleKey: key, sample: sentence });
+            break;
+          }
+        } catch (e) {}
+      }
+    }
+  }
+  return templates;
+}
+
+/* ============================================================
+   ИЗВЛЕЧЕНИЕ ЗАДАЧ ИЗ PDF (для пакетной обработки)
+   ============================================================ */
+function extractTasksFromPage(text) {
+  const tasks = [];
+  if (isBrokenPdfText(text)) return tasks;
+
+  // Ищем блоки, начинающиеся с номера задачи
+  const blocks = text.split(/(?=(?:^|\n)\s*\d{1,3}\.\s)/);
+  for (const rawBlock of blocks) {
+    const block = rawBlock.trim();
+    if (block.length < 20 || block.length > 600) continue;
+    if (!/[а-яА-Я]/.test(block)) continue;
+    if (isBrokenPdfText(block)) continue;
+    if (!hasTaskKeyword(block)) continue;
+
+    // Отсеиваем блоки с явным мусором (много цифр подряд без букв)
+    const withoutDigits = block.replace(/\d+/g, '');
+    if (withoutDigits.replace(/\s/g, '').length < 10) continue;
+
+    tasks.push(block);
+  }
+  return tasks;
+}
+
+/* ============================================================
+   FIGURE — ДВИЖОК ЧЕРТЕЖЕЙ
+   ============================================================ */
+class Figure {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.W = canvas.width;
+    this.H = canvas.height;
+    this.points = {};
+    this.segments = [];
+    this.arcs = [];
+    this.angles = [];
+    this.rightAngles = [];
+    this.labels = [];
+    this.extras = [];
+    this.title = '';
+    this.transform = null;
+  }
+
+  addPoint(name, x, y, opts = {}) {
+    this.points[name] = {
+      x, y,
+      label: opts.label !== false,
+      labelText: opts.labelText || name,
+      offset: opts.offset || [0, -12]
+    };
+    return this;
+  }
+
+  addSegment(from, to, opts = {}) {
+    this.segments.push({
+      from, to,
+      style: opts.style || 'solid',
+      marks: opts.marks || 0,
+      label: opts.label,
+      color: opts.color || '#0066ff'
+    });
+    return this;
+  }
+
+  addArc(center, from, to, opts = {}) {
+    this.arcs.push({
+      center, from, to,
+      radius: opts.radius || 25,
+      marks: opts.marks || 1,
+      color: opts.color || '#e91e63'
+    });
+    return this;
+  }
+
+  addAngle(vertex, from, to, opts = {}) {
+    this.angles.push({
+      vertex, from, to,
+      marks: opts.marks || 1,
+      value: opts.value,
+      showValue: opts.showValue,
+      radius: opts.radius || 25
+    });
+    return this;
+  }
+
+  addRightAngle(vertex, from, to) {
+    this.rightAngles.push({ vertex, from, to });
+    return this;
+  }
+
+  addLabel(x, y, text, opts = {}) {
+    this.labels.push({
+      x, y, text,
+      color: opts.color || '#333',
+      size: opts.size || 13
+    });
+    return this;
+  }
+
+  addExtra(fn) {
+    this.extras.push(fn);
+    return this;
+  }
+
+  setTitle(t) { this.title = t; return this; }
+
+  render() {
+    const { ctx, W, H } = this;
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, W, H);
+
+    // Заголовок
+    if (this.title) {
+      ctx.fillStyle = '#333';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(this.title, 10, 20);
+    }
+
+    // Автомасштабирование
+    const pts = Object.values(this.points);
+    if (pts.length > 0) {
+      const xs = pts.map(p => p.x);
+      const ys = pts.map(p => p.y);
+      const minX = Math.min(...xs), maxX = Math.max(...xs);
+      const minY = Math.min(...ys), maxY = Math.max(...ys);
+      const padX = 70, padY = 70;
+      const scaleX = (W - padX * 2) / Math.max(maxX - minX, 1);
+      const scaleY = (H - padY * 2) / Math.max(maxY - minY, 1);
+      const scale = Math.min(scaleX, scaleY, 80);
+      const offsetX = (W - (maxX - minX) * scale) / 2 - minX * scale;
+      const offsetY = (H + (maxY - minY) * scale) / 2 + minY * scale;
+      this.transform = (p) => ({
+        x: offsetX + p.x * scale,
+        y: offsetY - p.y * scale
+      });
+    } else {
+      this.transform = (p) => p;
+    }
+
+    // Отрезки
+    for (const seg of this.segments) {
+      const a = this.points[seg.from];
+      const b = this.points[seg.to];
+      if (!a || !b) continue;
+      const pa = this.transform(a);
+      const pb = this.transform(b);
+      ctx.strokeStyle = seg.color;
+      ctx.lineWidth = 2;
+      if (seg.style === 'dashed') ctx.setLineDash([6, 4]);
+      else ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.moveTo(pa.x, pa.y);
+      ctx.lineTo(pb.x, pb.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      if (seg.marks > 0) {
+        const midX = (pa.x + pb.x) / 2;
+        const midY = (pa.y + pb.y) / 2;
+        const dx = pb.x - pa.x;
+        const dy = pb.y - pa.y;
+        const len = Math.sqrt(dx*dx + dy*dy) || 1;
+        const nx = -dy / len;
+        const ny = dx / len;
+        ctx.strokeStyle = seg.color;
+        for (let i = 0; i < seg.marks; i++) {
+          const offset = (i - (seg.marks - 1) / 2) * 6;
+          ctx.beginPath();
+          ctx.moveTo(midX + nx * 5 + dx / len * offset, midY + ny * 5 + dy / len * offset);
+          ctx.lineTo(midX - nx * 5 + dx / len * offset, midY - ny * 5 + dy / len * offset);
+          ctx.stroke();
+        }
+      }
+
+      if (seg.label) {
+        const midX = (pa.x + pb.x) / 2;
+        const midY = (pa.y + pb.y) / 2;
+        ctx.fillStyle = '#333';
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(seg.label, midX + 12, midY - 5);
+      }
+    }
+
+    // Дуги углов
+    for (const ang of this.angles) {
+      const v = this.points[ang.vertex];
+      const a = this.points[ang.from];
+      const b = this.points[ang.to];
+      if (!v || !a || !b) continue;
+      const pv = this.transform(v);
+      const pa = this.transform(a);
+      const pb = this.transform(b);
+      const angleA = Math.atan2(pa.y - pv.y, pa.x - pv.x);
+      const angleB = Math.atan2(pb.y - pv.y, pb.x - pv.x);
+      let start = angleA, end = angleB;
+      let diff = end - start;
+      while (diff > Math.PI) diff -= 2 * Math.PI;
+      while (diff < -Math.PI) diff += 2 * Math.PI;
+
+      const radius = ang.radius;
+      ctx.strokeStyle = ang.color || '#e91e63';
+      ctx.lineWidth = 1.5;
+      for (let m = 0; m < ang.marks; m++) {
+        const r = radius + m * 5;
+        ctx.beginPath();
+        ctx.arc(pv.x, pv.y, r, Math.min(start, start + diff), Math.max(start, start + diff));
+        ctx.stroke();
+      }
+
+      if (ang.showValue && ang.value) {
+        const midAngle = start + diff / 2;
+        const labelX = pv.x + (radius + 20) * Math.cos(midAngle);
+        const labelY = pv.y + (radius + 20) * Math.sin(midAngle);
+        ctx.fillStyle = '#e91e63';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(ang.value, labelX, labelY);
+      }
+    }
+
+    // Прямые углы
+    for (const ra of this.rightAngles) {
+      const v = this.points[ra.vertex];
+      const a = this.points[ra.from];
+      const b = this.points[ra.to];
+      if (!v || !a || !b) continue;
+      const pv = this.transform(v);
+      const pa = this.transform(a);
+      const pb = this.transform(b);
+      const angleA = Math.atan2(pa.y - pv.y, pa.x - pv.x);
+      const angleB = Math.atan2(pb.y - pv.y, pb.x - pv.x);
+      const size = 12;
+      const p1 = { x: pv.x + size * Math.cos(angleA), y: pv.y + size * Math.sin(angleA) };
+      const p2 = { x: pv.x + size * Math.cos(angleB), y: pv.y + size * Math.sin(angleB) };
+      const p3 = { x: p1.x + p2.x - pv.x, y: p1.y + p2.y - pv.y };
+      ctx.strokeStyle = '#e91e63';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p3.x, p3.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.stroke();
+    }
+
+    // Дополнительные элементы
+    for (const fn of this.extras) {
+      fn(ctx, this);
+    }
+
+    // Точки и подписи
+    for (const [name, p] of Object.entries(this.points)) {
+      const pp = this.transform(p);
+      ctx.fillStyle = '#0066ff';
+      ctx.beginPath();
+      ctx.arc(pp.x, pp.y, 4, 0, 2 * Math.PI);
+      ctx.fill();
+
+      if (p.label) {
+        ctx.fillStyle = '#333';
+        ctx.font = 'bold 14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(p.labelText, pp.x + p.offset[0], pp.y + p.offset[1]);
+      }
+    }
+
+    // Подписи
+    for (const lbl of this.labels) {
+      ctx.fillStyle = lbl.color;
+      ctx.font = `${lbl.size}px sans-serif`;
+      ctx.textAlign = 'left';
+      ctx.fillText(lbl.text, lbl.x, lbl.y);
+    }
+  }
+}
+
+/* ============================================================
+   ПАРСЕР ЗАДАЧИ → СТРУКТУРА ФИГУРЫ
+   ============================================================ */
+function parseTaskToFigure(taskText) {
+  const lower = taskText.toLowerCase();
+  const nums = (taskText.match(/-?\d+(?:[.,]\d+)?/g) || []).map(n => parseFloat(n.replace(',', '.')));
+  const fig = { type: null, params: {} };
+
+  // Ищем имена вершин (заглавные латинские буквы)
+  const vertexMatches = taskText.match(/\b[A-Z]\b/g) || [];
+  const uniqueVertices = [...new Set(vertexMatches)];
+
+  // Треугольник
+  if (lower.includes('треугольник') || lower.includes('треуг') || lower.includes('△')) {
+    fig.type = 'triangle';
+    fig.points = uniqueVertices.slice(0, 3);
+    if (fig.points.length < 3) fig.points = ['A', 'B', 'C'];
+
+    if (lower.includes('прямоугольн')) {
+      fig.params.isRight = true;
+      const kat = taskText.match(/катет\w*\s*(?:равн\w*)?\s*(\d+(?:[.,]\d+)?)\s*и\s*(\d+(?:[.,]\d+)?)/i);
+      if (kat) { fig.params.a = parseFloat(kat[1].replace(',', '.')); fig.params.b = parseFloat(kat[2].replace(',', '.')); }
+      else if (nums.length >= 2) { fig.params.a = nums[0]; fig.params.b = nums[1]; }
+    }
+    if (lower.includes('равнобедренн')) {
+      fig.params.isIsosceles = true;
+    }
+    if (lower.includes('равносторонн')) {
+      fig.params.isEquilateral = true;
+    }
+
+    // Биссектриса
+    const bisMatch = taskText.match(/([A-Z])([A-Z])\s*(?:—|-|это\s+)?\s*биссектрис/i) ||
+                     taskText.match(/биссектрис\w*\s+([A-Z])([A-Z])/i);
+    if (bisMatch) fig.params.bisector = [bisMatch[1], bisMatch[2]];
+
+    // Медиана
+    const medMatch = taskText.match(/([A-Z])([A-Z])\s*(?:—|-|это\s+)?\s*медиан/i) ||
+                     taskText.match(/медиан\w*\s+([A-Z])([A-Z])/i);
+    if (medMatch) fig.params.median = [medMatch[1], medMatch[2]];
+
+    // Высота
+    const hMatch = taskText.match(/([A-Z])([A-Z])\s*(?:—|-|это\s+)?\s*высот/i) ||
+                   taskText.match(/высот\w*\s+([A-Z])([A-Z])/i);
+    if (hMatch) fig.params.height = [hMatch[1], hMatch[2]];
+
+    // Точки пересечения
+    const interMatch = taskText.match(/пересекаются\s+в\s+точке\s+([A-Z])/i);
+    if (interMatch) fig.params.intersection = interMatch[1];
+
+    // Стороны
+    const sides = {};
+    for (const v1 of fig.points) {
+      for (const v2 of fig.points) {
+        if (v1 === v2) continue;
+        const re = new RegExp(v1 + v2 + '\\s*=\\s*(\\d+(?:[.,]\\d+)?)', 'i');
+        const m = taskText.match(re);
+        if (m) sides[v1 + v2] = parseFloat(m[1].replace(',', '.'));
+      }
+    }
+    if (Object.keys(sides).length > 0) fig.params.sides = sides;
+
+    // Углы
+    const angleMatch = taskText.match(/[∠∠]\s*([A-Z])\s*=?\s*(\d+)/);
+    if (angleMatch) fig.params.angle = { vertex: angleMatch[1], value: parseFloat(angleMatch[2]) };
+
+    return fig;
+  }
+
+  // Ромб
+  if (lower.includes('ромб')) {
+    fig.type = 'rhombus';
+    const m = taskText.match(/ромб\w*\s+([A-Z]{4})/);
+    fig.points = m ? m[1].split('') : ['A', 'B', 'C', 'D'];
+    const diag = taskText.match(/диагонал\w*\s*(?:равны\s*)?(\d+(?:[.,]\d+)?)\s*и\s*(\d+(?:[.,]\d+)?)/i);
+    if (diag) { fig.params.d1 = parseFloat(diag[1].replace(',', '.')); fig.params.d2 = parseFloat(diag[2].replace(',', '.')); }
+    return fig;
+  }
+
+  // Параллелограмм
+  if (lower.includes('параллелограмм')) {
+    fig.type = 'parallelogram';
+    const m = taskText.match(/параллелограмм\w*\s+([A-Z]{4})/);
+    fig.points = m ? m[1].split('') : ['A', 'B', 'C', 'D'];
+    const sides = taskText.match(/(\d+(?:[.,]\d+)?)\s*и\s*(\d+(?:[.,]\d+)?)/);
+    if (sides) { fig.params.a = parseFloat(sides[1].replace(',', '.')); fig.params.b = parseFloat(sides[2].replace(',', '.')); }
+    const angle = taskText.match(/угол\w*\s*=?\s*(\d+)/i);
+    if (angle) fig.params.angle = parseFloat(angle[1]);
+    return fig;
+  }
+
+  // Трапеция
+  if (lower.includes('трапец')) {
+    fig.type = 'trapezoid';
+    const m = taskText.match(/трапец\w*\s+([A-Z]{4})/);
+    fig.points = m ? m[1].split('') : ['A', 'B', 'C', 'D'];
+    const osn = taskText.match(/основан\w*\s*(?:равны\s*)?(\d+(?:[.,]\d+)?)\s*и\s*(\d+(?:[.,]\d+)?)/i);
+    if (osn) { fig.params.a = parseFloat(osn[1].replace(',', '.')); fig.params.b = parseFloat(osn[2].replace(',', '.')); }
+    else if (nums.length >= 2) { fig.params.a = nums[0]; fig.params.b = nums[1]; }
+    const h = taskText.match(/высот\w*\s*=?\s*(\d+(?:[.,]\d+)?)/i);
+    if (h) fig.params.h = parseFloat(h[1].replace(',', '.'));
+    return fig;
+  }
+
+  // Прямоугольник
+  if (lower.includes('прямоугольник')) {
+    fig.type = 'rectangle';
+    const m = taskText.match(/прямоугольник\w*\s+([A-Z]{4})/);
+    fig.points = m ? m[1].split('') : ['A', 'B', 'C', 'D'];
+    const sides = taskText.match(/(?:сторон\w*\s+)?(\d+(?:[.,]\d+)?)\s*(?:и|×|x|х)\s*(\d+(?:[.,]\d+)?)/i);
+    if (sides) { fig.params.a = parseFloat(sides[1].replace(',', '.')); fig.params.b = parseFloat(sides[2].replace(',', '.')); }
+    return fig;
+  }
+
+  // Квадрат
+  if (lower.includes('квадрат')) {
+    fig.type = 'square';
+    const m = taskText.match(/квадрат\w*\s+([A-Z]{4})/);
+    fig.points = m ? m[1].split('') : ['A', 'B', 'C', 'D'];
+    const side = taskText.match(/сторон\w*\s*=?\s*(\d+(?:[.,]\d+)?)/i);
+    if (side) fig.params.a = parseFloat(side[1].replace(',', '.'));
+    else if (nums.length >= 1) fig.params.a = nums[0];
+    return fig;
+  }
+
+  // Окружность / круг
+  if (lower.includes('окружност') || lower.includes('круг')) {
+    fig.type = 'circle';
+    const r = taskText.match(/(?:r|радиус\w*)\s*=?\s*(\d+(?:[.,]\d+)?)/i);
+    if (r) fig.params.r = parseFloat(r[1].replace(',', '.'));
+    else if (nums.length >= 1) fig.params.r = nums[0];
+    const c = taskText.match(/(?:центр\w*|с центром)\s+(?:в\s+точке\s+)?([A-Z])/i);
+    fig.params.center = c ? c[1] : 'O';
+    return fig;
+  }
+
+  // Вектор
+  if (lower.includes('вектор')) {
+    fig.type = 'vector';
+    const m = taskText.match(/вектор\w*\s+([A-Z])([A-Z])/);
+    if (m) { fig.params.from = m[1]; fig.params.to = m[2]; }
+    const coord = taskText.match(/\(\s*(-?\d+(?:[.,]\d+)?)\s*[;:,]\s*(-?\d+(?:[.,]\d+)?)\s*\)/);
+    if (coord) { fig.params.x = parseFloat(coord[1].replace(',', '.')); fig.params.y = parseFloat(coord[2].replace(',', '.')); }
+    return fig;
+  }
+
+  return null;
+}
+
+/* ============================================================
+   ПОСТРОЕНИЕ КОНКРЕТНЫХ ФИГУР
+   ============================================================ */
+function buildTriangleFigure(fig, canvas) {
+  const f = new Figure(canvas);
+  const [A, B, C] = fig.points;
+  const sides = fig.params.sides || {};
+
+  let AB = sides[A+B] || sides[B+A] || 5;
+  let BC = sides[B+C] || sides[C+B] || 6;
+  let CA = sides[C+A] || sides[A+C] || 7;
+
+  if (fig.params.isRight) {
+    const a = fig.params.a || 3;
+    const b = fig.params.b || 4;
+    f.addPoint(A, 0, 0);
+    f.addPoint(B, a, 0);
+    f.addPoint(C, 0, b);
+    f.addSegment(A, B, { marks: 1, label: `${a}` });
+    f.addSegment(B, C);
+    f.addSegment(C, A, { marks: 1, label: `${b}` });
+    f.addRightAngle(A, B, C);
+  } else if (fig.params.isEquilateral) {
+    const a = AB;
+    f.addPoint(A, 0, 0);
+    f.addPoint(B, a, 0);
+    f.addPoint(C, a / 2, a * Math.sqrt(3) / 2);
+    f.addSegment(A, B, { marks: 1 });
+    f.addSegment(B, C, { marks: 1 });
+    f.addSegment(C, A, { marks: 1 });
+  } else if (fig.params.isIsosceles) {
+    // AB = AC, BC — основание
+    const side = AB;
+    const base = BC;
+    f.addPoint(A, 0, 0);
+    f.addPoint(B, -base/2, -Math.sqrt(side*side - base*base/4));
+    f.addPoint(C, base/2, -Math.sqrt(side*side - base*base/4));
+    f.addSegment(A, B, { marks: 1 });
+    f.addSegment(A, C, { marks: 1 });
+    f.addSegment(B, C);
+  } else {
+    // По трём сторонам
+    const cosA = (AB*AB + CA*CA - BC*BC) / (2 * AB * CA);
+    const angleA = Math.acos(Math.max(-1, Math.min(1, cosA)));
+    f.addPoint(A, 0, 0);
+    f.addPoint(B, AB, 0);
+    f.addPoint(C, CA * Math.cos(angleA), CA * Math.sin(angleA));
+    f.addSegment(A, B, { label: sides[A+B] ? String(sides[A+B]) : '' });
+    f.addSegment(B, C, { label: sides[B+C] ? String(sides[B+C]) : '' });
+    f.addSegment(C, A, { label: sides[C+A] ? String(sides[C+A]) : '' });
+  }
+
+  // Биссектриса
+  if (fig.params.bisector) {
+    const [v, end] = fig.params.bisector;
+    // end — точка на противоположной стороне. Например, AD — биссектриса из A, D на BC.
+    // Найдём две другие вершины
+    const otherVerts = fig.points.filter(p => p !== v && p !== end);
+    if (otherVerts.length >= 2) {
+      const pA = f.points[v];
+      const pB = f.points[otherVerts[0]];
+      const pC = f.points[otherVerts[1]];
+      // По теореме о биссектрисе: BD/DC = AB/AC
+      const AB_len = Math.hypot(pB.x - pA.x, pB.y - pA.y);
+      const AC_len = Math.hypot(pC.x - pA.x, pC.y - pA.y);
+      const ratio = AB_len / (AB_len + AC_len);
+      const Dx = pB.x + (pC.x - pB.x) * ratio;
+      const Dy = pB.y + (pC.y - pB.y) * ratio;
+      f.addPoint(end, Dx, Dy);
+      f.addSegment(v, end, { style: 'dashed', color: '#e91e63' });
+      f.addLabel(Dx + 15, Dy + 20, 'биссектриса', { color: '#e91e63', size: 11 });
+    }
+  }
+
+  // Медиана
+  if (fig.params.median) {
+    const [v, end] = fig.params.median;
+    const otherVerts = fig.points.filter(p => p !== v && p !== end);
+    if (otherVerts.length >= 2) {
+      const pB = f.points[otherVerts[0]];
+      const pC = f.points[otherVerts[1]];
+      const Mx = (pB.x + pC.x) / 2;
+      const My = (pB.y + pC.y) / 2;
+      f.addPoint(end, Mx, My);
+      f.addSegment(v, end, { style: 'dashed', color: '#4caf50' });
+      f.addLabel(Mx + 15, My - 5, 'медиана', { color: '#4caf50', size: 11 });
+    }
+  }
+
+  // Высота
+  if (fig.params.height) {
+    const [v, end] = fig.params.height;
+    const otherVerts = fig.points.filter(p => p !== v && p !== end);
+    if (otherVerts.length >= 2) {
+      const pA = f.points[v];
+      const pB = f.points[otherVerts[0]];
+      const pC = f.points[otherVerts[1]];
+      // Основание высоты — проекция A на BC
+      const dx = pC.x - pB.x;
+      const dy = pC.y - pB.y;
+      const t = ((pA.x - pB.x) * dx + (pA.y - pB.y) * dy) / (dx*dx + dy*dy);
+      const Hx = pB.x + t * dx;
+      const Hy = pB.y + t * dy;
+      f.addPoint(end, Hx, Hy);
+      f.addSegment(v, end, { style: 'dashed', color: '#9c27b0' });
+      f.addRightAngle(end, v, otherVerts[0]);
+      f.addLabel(Hx + 10, Hy + 20, 'высота', { color: '#9c27b0', size: 11 });
+    }
+  }
+
+  // Угол
+  if (fig.params.angle) {
+    const v = fig.params.angle.vertex;
+    const others = fig.points.filter(p => p !== v);
+    if (others.length >= 2) {
+      f.addAngle(v, others[0], others[1], {
+        marks: 1,
+        value: fig.params.angle.value + '°',
+        showValue: true,
+        radius: 30
+      });
+    }
+  }
+
+  f.setTitle('Треугольник ' + fig.points.join(''));
+  return f;
+}
+
+function buildRhombusFigure(fig, canvas) {
+  const f = new Figure(canvas);
+  const [A, B, C, D] = fig.points;
+  const d1 = fig.params.d1 || 6;
+  const d2 = fig.params.d2 || 8;
+
+  f.addPoint(A, -d1/2, 0);
+  f.addPoint(B, 0, d2/2);
+  f.addPoint(C, d1/2, 0);
+  f.addPoint(D, 0, -d2/2);
+  f.addPoint('O', 0, 0, { label: true, offset: [8, 8] });
+
+  f.addSegment(A, B, { marks: 1 });
+  f.addSegment(B, C, { marks: 1 });
+  f.addSegment(C, D, { marks: 1 });
+  f.addSegment(D, A, { marks: 1 });
+  f.addSegment(A, C, { style: 'dashed', color: '#999' });
+  f.addSegment(B, D, { style: 'dashed', color: '#999' });
+
+  f.addRightAngle('O', A, B);
+
+  f.setTitle('Ромб ' + fig.points.join(''));
+  return f;
+}
+
+function buildParallelogramFigure(fig, canvas) {
+  const f = new Figure(canvas);
+  const [A, B, C, D] = fig.points;
+  const a = fig.params.a || 6;
+  const b = fig.params.b || 4;
+  const angle = (fig.params.angle || 60) * Math.PI / 180;
+
+  f.addPoint(A, 0, 0);
+  f.addPoint(B, a, 0);
+  f.addPoint(C, a + b * Math.cos(angle), b * Math.sin(angle));
+  f.addPoint(D, b * Math.cos(angle), b * Math.sin(angle));
+
+  f.addSegment(A, B, { label: String(a) });
+  f.addSegment(B, C, { label: String(b) });
+  f.addSegment(C, D);
+  f.addSegment(D, A);
+  f.addSegment(A, C, { style: 'dashed', color: '#999' });
+  f.addSegment(B, D, { style: 'dashed', color: '#999' });
+
+  f.setTitle('Параллелограмм ' + fig.points.join(''));
+  return f;
+}
+
+function buildTrapezoidFigure(fig, canvas) {
+  const f = new Figure(canvas);
+  const [A, B, C, D] = fig.points; // A, B — нижнее основание, C, D — верхнее
+  const a = fig.params.a || 8;
+  const b = fig.params.b || 4;
+  const h = fig.params.h || 3;
+
+  f.addPoint(A, 0, 0);
+  f.addPoint(B, a, 0);
+  f.addPoint(C, (a + b) / 2, h);
+  f.addPoint(D, (a - b) / 2, h);
+
+  f.addSegment(A, B, { label: String(a) });
+  f.addSegment(B, C);
+  f.addSegment(C, D, { label: String(b) });
+  f.addSegment(D, A);
+
+  // Высота
+  const hx = (a - b) / 2;
+  f.addSegment(D, D, {});
+  f.addSegment(A, D, {});
+
+  f.setTitle('Трапеция ' + fig.points.join(''));
+  return f;
+}
+
+function buildRectangleFigure(fig, canvas) {
+  const f = new Figure(canvas);
+  const [A, B, C, D] = fig.points;
+  const a = fig.params.a || 6;
+  const b = fig.params.b || 4;
+
+  f.addPoint(A, 0, 0);
+  f.addPoint(B, a, 0);
+  f.addPoint(C, a, b);
+  f.addPoint(D, 0, b);
+
+  f.addSegment(A, B, { label: String(a) });
+  f.addSegment(B, C, { label: String(b) });
+  f.addSegment(C, D);
+  f.addSegment(D, A);
+  f.addRightAngle(A, B, D);
+
+  f.setTitle('Прямоугольник ' + fig.points.join(''));
+  return f;
+}
+
+function buildSquareFigure(fig, canvas) {
+  const f = new Figure(canvas);
+  const [A, B, C, D] = fig.points;
+  const a = fig.params.a || 5;
+
+  f.addPoint(A, 0, 0);
+  f.addPoint(B, a, 0);
+  f.addPoint(C, a, a);
+  f.addPoint(D, 0, a);
+
+  f.addSegment(A, B, { marks: 1 });
+  f.addSegment(B, C, { marks: 1 });
+  f.addSegment(C, D, { marks: 1 });
+  f.addSegment(D, A, { marks: 1 });
+  f.addRightAngle(A, B, D);
+
+  f.setTitle('Квадрат ' + fig.points.join(''));
+  return f;
+}
+
+function buildCircleFigure(fig, canvas) {
+  const f = new Figure(canvas);
+  const center = fig.params.center || 'O';
+  const r = fig.params.r || 5;
+
+  f.addPoint(center, 0, 0);
+  f.addPoint('R', r, 0, { label: true, labelText: '' });
+
+  f.addSegment(center, 'R', { color: '#0066ff' });
+  f.addLabel(r/2 - 10, -8, `r = ${r}`, { color: '#0066ff', size: 12 });
+
+  f.addExtra((ctx, self) => {
+    const pc = self.transform(self.points[center]);
+    const pr = self.transform(self.points['R']);
+    const radius = Math.abs(pr.x - pc.x);
+    ctx.strokeStyle = '#0066ff';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(pc.x, pc.y, radius, 0, 2 * Math.PI);
+    ctx.stroke();
+  });
+
+  f.setTitle(`Окружность с центром ${center}, r = ${r}`);
+  return f;
+}
+
+function buildVectorFigure(fig, canvas) {
+  const f = new Figure(canvas);
+  const x = fig.params.x || 3;
+  const y = fig.params.y || 4;
+
+  f.addExtra((ctx, self) => {
+    const cx = self.W / 2, cy = self.H / 2;
+    const scale = Math.min(self.W, self.H) * 0.3 / Math.max(Math.abs(x), Math.abs(y), 1);
+
+    // Оси
+    ctx.strokeStyle = '#ddd';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(30, cy); ctx.lineTo(self.W - 30, cy);
+    ctx.moveTo(cx, 30); ctx.lineTo(cx, self.H - 30);
+    ctx.stroke();
+
+    // Стрелки
+    ctx.fillStyle = '#999';
+    ctx.beginPath();
+    ctx.moveTo(self.W - 30, cy);
+    ctx.lineTo(self.W - 40, cy - 5);
+    ctx.lineTo(self.W - 40, cy + 5);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(cx, 30);
+    ctx.lineTo(cx - 5, 40);
+    ctx.lineTo(cx + 5, 40);
+    ctx.fill();
+
+    // Вектор
+    const ex = cx + x * scale;
+    const ey = cy - y * scale;
+    ctx.strokeStyle = '#0066ff';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(ex, ey);
+    ctx.stroke();
+
+    const angle = Math.atan2(ey - cy, ex - cx);
+    const headLen = 14;
+    ctx.beginPath();
+    ctx.moveTo(ex, ey);
+    ctx.lineTo(ex - headLen * Math.cos(angle - 0.4), ey - headLen * Math.sin(angle - 0.4));
+    ctx.moveTo(ex, ey);
+    ctx.lineTo(ex - headLen * Math.cos(angle + 0.4), ey - headLen * Math.sin(angle + 0.4));
+    ctx.stroke();
+
+    ctx.fillStyle = '#0066ff';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.fillText(`(${x}; ${y})`, ex + 8, ey - 8);
+  });
+
+  f.setTitle(`Вектор (${x}; ${y})`);
+  return f;
+}
+
+function buildFigureFromParse(fig, canvas) {
+  switch (fig.type) {
+    case 'triangle': return buildTriangleFigure(fig, canvas);
+    case 'rhombus': return buildRhombusFigure(fig, canvas);
+    case 'parallelogram': return buildParallelogramFigure(fig, canvas);
+    case 'trapezoid': return buildTrapezoidFigure(fig, canvas);
+    case 'rectangle': return buildRectangleFigure(fig, canvas);
+    case 'square': return buildSquareFigure(fig, canvas);
+    case 'circle': return buildCircleFigure(fig, canvas);
+    case 'vector': return buildVectorFigure(fig, canvas);
+    default: return null;
+  }
+}
+
+/* ============================================================
+   ГЛАВНАЯ ФУНКЦИЯ: задача → чертёж
+   ============================================================ */
+function drawTaskFigure(taskText, container) {
+  // Убираем предыдущий
+  container.innerHTML = '';
+
+  const fig = parseTaskToFigure(taskText);
+  if (!fig) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = '<h2>📐 Чертёж</h2><div class="small" style="color:var(--fg2)">Не удалось построить чертёж — тип задачи не распознан</div>';
+    container.appendChild(card);
+    return;
+  }
+
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = '<h2>📐 Чертёж</h2>';
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 500;
+  canvas.height = 400;
+  canvas.className = 'preview';
+  card.appendChild(canvas);
+
+  try {
+    const figure = buildFigureFromParse(fig, canvas);
+    if (figure) {
+      figure.render();
+    } else {
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#333';
+      ctx.font = '14px sans-serif';
+      ctx.fillText('Тип фигуры не поддерживается: ' + fig.type, 20, 40);
+    }
+  } catch (e) {
+    logMsg('Ошибка построения чертежа: ' + e.message);
+  }
+
+  container.appendChild(card);
+}
+
+/* ============================================================
+   УЧЕБНИКИ
+   ============================================================ */
+let currentBookId = null;
+
+async function createBook(name) {
+  const book = { id: uid(), name, created: new Date().toISOString() };
+  await idbPut('books', book);
+  await refreshBooksList();
+  await updateStats();
+  toast('Учебник создан');
+  return book;
+}
+
+async function deleteBook(bookId) {
+  if (!confirm('Удалить учебник?')) return;
+  const pages = await idbGetAll('pages');
+  const templates = await idbGetAll('templates');
+  for (const p of pages) if (p.bookId === bookId) await idbDelete('pages', p.id);
+  for (const t of templates) if (t.bookId === bookId) await idbDelete('templates', t.id);
+  await idbDelete('books', bookId);
+  if (currentBookId === bookId) currentBookId = null;
+  await refreshBooksList();
+  await updateStats();
+  toast('Удалено');
+}
+
+async function addPageToBook(bookId, text, image, source) {
+  const cleaned = cleanPdfText(text);
+  const page = { id: uid(), bookId, text: cleaned, rawText: text, image, source: source || 'pdf', date: new Date().toISOString() };
+  await idbPut('pages', page);
+  const templates = extractTemplates(cleaned);
+  for (const tmpl of templates) {
+    await idbPut('templates', {
+      id: uid(), bookId, pageId: page.id,
+      ruleKey: tmpl.ruleKey, sample: tmpl.sample.substring(0, 500),
+      date: new Date().toISOString()
+    });
+  }
+  await updateStats();
+  return page;
+}
+
+async function refreshBooksList() {
+  const books = await idbGetAll('books');
+  const el = $('#booksList');
+  el.innerHTML = '';
+  const pdfSel = $('#pdfBookSelect');
+  const ocrSel = $('#ocrBookSelect');
+  pdfSel.innerHTML = '<option value="">— выбери учебник —</option>';
+  ocrSel.innerHTML = '<option value="">— выбери учебник —</option>';
+
+  if (books.length === 0) {
+    el.innerHTML = '<div class="small" style="color:var(--fg2)">Нет учебников</div>';
+    return;
+  }
+  const pages = await idbGetAll('pages');
+  const templates = await idbGetAll('templates');
+  for (const book of books) {
+    const pc = pages.filter(p => p.bookId === book.id).length;
+    const tc = templates.filter(t => t.bookId === book.id).length;
+    const div = document.createElement('div');
+    div.className = 'book-card' + (currentBookId === book.id ? ' active' : '');
+    div.innerHTML = `<h3>${escapeHtml(book.name)}</h3><div class="meta">${pc} стр · ${tc} шаблонов</div>`;
+    div.onclick = () => selectBook(book.id);
+    el.appendChild(div);
+
+    const opt1 = document.createElement('option');
+    opt1.value = book.id; opt1.textContent = book.name;
+    pdfSel.appendChild(opt1);
+    const opt2 = document.createElement('option');
+    opt2.value = book.id; opt2.textContent = book.name;
+    ocrSel.appendChild(opt2);
+  }
+}
+
+async function selectBook(bookId) {
+  currentBookId = bookId;
+  const book = await idbGet('books', bookId);
+  if (!book) return;
+  $('#bookNameLabel').textContent = book.name;
+  $('#bookCard').style.display = 'block';
+  $('#bookContent').innerHTML = '';
+  await refreshBooksList();
+  await updateBookStats();
+}
+
+async function updateBookStats() {
+  if (!currentBookId) return;
+  const pages = (await idbGetAll('pages')).filter(p => p.bookId === currentBookId);
+  const templates = (await idbGetAll('templates')).filter(t => t.bookId === currentBookId);
+  $('#bookPages').textContent = pages.length;
+  $('#bookTemplates').textContent = templates.length;
+}
+
+async function viewBookPages() {
+  if (!currentBookId) return;
+  const pages = (await idbGetAll('pages')).filter(p => p.bookId === currentBookId);
+  const el = $('#bookContent');
+  el.innerHTML = `<h3 class="small">Страницы (${pages.length})</h3>`;
+  for (const p of pages.reverse()) {
+    const div = document.createElement('div');
+    div.className = 'page-item';
+    div.innerHTML = `<div class="date">${new Date(p.date).toLocaleString()} · ${p.source}</div>` +
+      `<div>${escapeHtml((p.text || '').substring(0, 200))}</div>`;
+    el.appendChild(div);
+  }
+}
+
+async function viewBookTemplates() {
+  if (!currentBookId) return;
+  const templates = (await idbGetAll('templates')).filter(t => t.bookId === currentBookId);
+  const el = $('#bookContent');
+  el.innerHTML = `<h3 class="small">Шаблоны (${templates.length})</h3>`;
+  for (const t of templates) {
+    const div = document.createElement('div');
+    div.className = 'template-item';
+    div.innerHTML = `<div class="tmpl-title">${RULES[t.ruleKey] ? RULES[t.ruleKey].name : t.ruleKey}</div>` +
+      `<div class="tmpl-body">${escapeHtml(t.sample)}</div>`;
+    el.appendChild(div);
+  }
+}
+
+async function autoProcessBook() {
+  if (!currentBookId) { toast('Выбери учебник'); return; }
+  const pages = (await idbGetAll('pages')).filter(p => p.bookId === currentBookId);
+  if (pages.length === 0) { toast('Нет страниц'); return; }
+
+  $('#bookProcessProgress').classList.add('show');
+  $('#bookProcessFill').style.width = '0%';
+
+  let processed = 0;
+  let tasksFound = 0;
+  let solvedByRules = 0;
+  let sentToAI = 0;
+  let savedToDataset = 0;
+
+  for (let i = 0; i < pages.length; i++) {
+    const page = pages[i];
+    const tasks = extractTasksFromPage(page.text);
+
+    for (const task of tasks) {
+      tasksFound++;
+
+      // 1. Сначала пробуем правила
+      const ruleResult = detectAndSolve(task);
+      if (ruleResult) {
+        await saveToDataset(task, buildAnswerText(ruleResult), { verified: true, source: 'rules' });
+        solvedByRules++;
+        savedToDataset++;
+      } else if (aiPipeline) {
+        // 2. Правила не справились, идём в Qwen
+        sentToAI++;
+        try {
+          const prompt = `Реши задачу пошагово. Ответь СТРОГО в формате JSON:
+{"steps":[{"text":"пояснение","latex":"формула"}],"answerLatex":"ответ","answer":"ответ текстом"}
+Задача: ${task}`;
+          const aiResp = await askAI(prompt, { temperature: 0.1, maxTokens: 600 });
+          if (aiResp) {
+            await saveToDataset(task, aiResp, { verified: false, source: 'ai' });
+            savedToDataset++;
+          }
+        } catch (e) {
+          logMsg('Ошибка ИИ при обработке: ' + e.message);
+        }
+      }
+    }
+
+    processed++;
+    $('#bookProcessFill').style.width = ((i + 1) / pages.length * 100) + '%';
+    $('#bookProcessStatus').textContent = `${processed}/${pages.length} стр, задач: ${tasksFound}, правила: ${solvedByRules}, ИИ: ${sentToAI}, датасет: ${savedToDataset}`;
+
+    if (i % 3 === 0) await new Promise(r => setTimeout(r, 30));
+  }
+
+  $('#bookProcessProgress').classList.remove('show');
+  await updateDatasetStats();
+  toast(`Готово. Задач: ${tasksFound}, решено правилами: ${solvedByRules}, отправлено ИИ: ${sentToAI}`);
+}
+
+function buildAnswerText(result) {
+  let text = '';
+  for (const step of result.steps) {
+    text += step.text + '\n';
+    if (step.latex) text += step.latex + '\n';
+  }
+  text += 'Ответ: ' + result.answer;
+  return text;
+}
+
+/* ============================================================
+   КЛАССИФИКАТОР
+   ============================================================ */
+let classifierModel = null;
+let classifierVocab = {};
+let classifierLabels = [];
+let classifierTrained = false;
+let trainAbort = null;
+let lossHistory = [];
+let accHistory = [];
+
+const DEFAULT_EXAMPLES = [
+  { text: '3/4 + 2/5', type: 'fraction_add' },
+  { text: '2/3 × 4/5', type: 'fraction_mul' },
+  { text: 'сократить 12/18', type: 'fraction_simplify' },
+  { text: '15% от 200', type: 'percent_of' },
+  { text: '2x + 3 = 7', type: 'linear_eq' },
+  { text: 'x^2 - 5x + 6 = 0', type: 'quadratic' },
+  { text: 'дискриминант 1 -5 6', type: 'discriminant' },
+  { text: 'теорема виета x² - 5x + 6', type: 'vieta' },
+  { text: 'площадь круга r=5', type: 'circle_area' },
+  { text: 'длина окружности r=5', type: 'circle_circumference' },
+  { text: 'площадь квадрата a=5', type: 'square_area' },
+  { text: 'периметр квадрата a=5', type: 'square_perimeter' },
+  { text: 'площадь прямоугольника a=4 b=5', type: 'rectangle_area' },
+  { text: 'периметр прямоугольника a=4 b=5', type: 'rectangle_perimeter' },
+  { text: 'площадь треугольника a=6 h=4', type: 'triangle_area' },
+  { text: 'площадь трапеции a=4 b=6 h=3', type: 'trapezoid_area' },
+  { text: 'площадь параллелограмма a=5 h=3', type: 'parallelogram_area' },
+  { text: 'площадь ромба d1=4 d2=6', type: 'rhombus_area' },
+  { text: 'объём куба a=3', type: 'cube_volume' },
+  { text: 'найди гипотенузу если катеты 3 и 4', type: 'pythagoras' },
+  { text: 'найди расстояние между точками A(1;2) и B(4;6)', type: 'distance_points' },
+  { text: 'найди середину отрезка A(1;2) B(5;8)', type: 'midpoint' },
+  { text: 'скалярное произведение a(1;2) b(3;4)', type: 'scalar_product' }
+];
+
+function tokenize(text) {
+  const cleaned = text.toLowerCase()
+    .replace(/(\d+)\s*\/\s*(\d+)/g, ' NUMFRAC ')
+    .replace(/(\d+)/g, ' NUM ')
+    .replace(/([+\-*/×÷=():²^])/g, ' $1 ')
+    .replace(/\s+/g, ' ').trim();
+  return cleaned.split(' ').filter(t => t.length > 0);
+}
+
+function buildVocab(examples) {
+  const counts = {};
+  for (const ex of examples) {
+    for (const tok of tokenize(ex.text)) counts[tok] = (counts[tok] || 0) + 1;
+  }
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const vocab = { '<PAD>': 0, '<UNK>': 1 };
+  let idx = 2;
+  for (const [tok] of sorted) {
+    if (idx >= 500) break;
+    vocab[tok] = idx; idx++;
+  }
+  return vocab;
+}
+
+function encodeText(text, maxLen = 24) {
+  const tokens = tokenize(text);
+  const ids = new Array(maxLen).fill(0);
+  for (let i = 0; i < Math.min(tokens.length, maxLen); i++) {
+    ids[i] = classifierVocab[tokens[i]] !== undefined ? classifierVocab[tokens[i]] : 1;
+  }
+  return ids;
+}
+
+function buildClassifier(vocabSize, numClasses) {
+  const maxLen = 24;
+  const embedDim = parseInt($('#trainEmbed').value) || 32;
+  const hidden = parseInt($('#trainHidden').value) || 48;
+  const input = tf.input({ shape: [maxLen] });
+  let x = tf.layers.embedding({ inputDim: vocabSize, outputDim: embedDim, inputLength: maxLen }).apply(input);
+  x = tf.layers.globalAveragePooling1d({}).apply(x);
+  x = tf.layers.dense({ units: hidden, activation: 'relu' }).apply(x);
+  x = tf.layers.dropout({ rate: 0.2 }).apply(x);
+  x = tf.layers.dense({ units: hidden, activation: 'relu' }).apply(x);
+  const output = tf.layers.dense({ units: numClasses, activation: 'softmax' }).apply(x);
+  const model = tf.model({ inputs: input, outputs: output });
+  model.compile({
+    optimizer: tf.train.adam(parseFloat($('#trainLR').value) || 0.005),
+    loss: 'categoricalCrossentropy',
+    metrics: ['accuracy']
+  });
+  return model;
+}
+
+async function getExamples() { return await idbGetAll('examples'); }
+
+async function loadDefaultExamples() {
+  const existing = await getExamples();
+  const existingSet = new Set(existing.map(e => e.text + '|' + e.type));
+  let added = 0;
+  for (const ex of DEFAULT_EXAMPLES) {
+    const key = ex.text + '|' + ex.type;
+    if (!existingSet.has(key)) {
+      await idbPut('examples', { id: uid(), text: ex.text, type: ex.type, date: new Date().toISOString() });
+      added++;
+    }
+  }
+  await refreshExamplesList();
+  toast('Добавлено: ' + added);
+}
+
+async function refreshExamplesList() {
+  const examples = await getExamples();
+  const el = $('#examplesList');
+  if (examples.length === 0) {
+    el.textContent = 'Нет примеров';
+    $('#trainExampleCount').textContent = '0';
+    return;
+  }
+  $('#trainExampleCount').textContent = examples.length;
+  el.innerHTML = '';
+  for (const ex of examples.slice(-100)) {
+    const div = document.createElement('div');
+    div.className = 'example-item';
+    div.innerHTML = `<span>${escapeHtml(ex.text.substring(0, 60))} → <b>${ex.type}</b></span>` +
+      `<button data-id="${ex.id}">✕</button>`;
+    div.querySelector('button').onclick = async () => {
+      await idbDelete('examples', ex.id);
+      await refreshExamplesList();
+    };
+    el.appendChild(div);
+  }
+  await updateStats();
+}
+
+async function refreshTemplatesList() {
+  const templates = await idbGetAll('templates');
+  const el = $('#templatesList');
+  if (templates.length === 0) {
+    el.textContent = 'Нет шаблонов. Загрузи PDF учебника.';
+    return;
+  }
+  el.innerHTML = '';
+  for (const t of templates.slice(-50)) {
+    const div = document.createElement('div');
+    div.className = 'template-item';
+    div.innerHTML = `<div class="tmpl-title">${RULES[t.ruleKey] ? RULES[t.ruleKey].name : t.ruleKey}</div>` +
+      `<div class="tmpl-body">${escapeHtml(t.sample.substring(0, 150))}</div>`;
+    el.appendChild(div);
+  }
+}
+
+async function cleanTemplates() {
+  const templates = await idbGetAll('templates');
+  let removed = 0, kept = 0;
+  for (const t of templates) {
+    const sample = (t.sample || '').trim();
+    if (isBrokenPdfText(sample) || !hasTaskKeyword(sample)) {
+      await idbDelete('templates', t.id);
+      removed++;
+    } else kept++;
+  }
+  await refreshTemplatesList();
+  await updateStats();
+  await updateBookStats();
+  toast('Удалено: ' + removed + ', осталось: ' + kept);
+}
+
+async function trainClassifier() {
+  if (trainAbort) return;
+  if (typeof tf === 'undefined') { toast('TF не загружен'); return; }
+  const examples = await getExamples();
+  if (examples.length < 5) { toast('Нужно минимум 5 примеров'); return; }
+  trainAbort = new AbortController();
+  $('#btnTrain').disabled = true;
+  $('#btnCancelTrain').disabled = false;
+  $('#trainProgress').classList.add('show');
+  try {
+    classifierVocab = buildVocab(examples);
+    const labelsSet = new Set(examples.map(e => e.type));
+    classifierLabels = Array.from(labelsSet).sort();
+    const maxLen = 24;
+    const X = examples.map(e => encodeText(e.text, maxLen));
+    const y = examples.map(e => classifierLabels.indexOf(e.type));
+    const xTensor = tf.tensor2d(X, [X.length, maxLen], 'float32');
+    const yTensor = tf.oneHot(tf.tensor1d(y, 'int32'), classifierLabels.length);
+    if (classifierModel) classifierModel.dispose();
+    classifierModel = buildClassifier(Object.keys(classifierVocab).length, classifierLabels.length);
+    lossHistory = []; accHistory = [];
+    const epochs = parseInt($('#trainEpochs').value) || 150;
+    const batch = parseInt($('#trainBatch').value) || 16;
+    await classifierModel.fit(xTensor, yTensor, {
+      epochs, batchSize: batch, validationSplit: 0.15, shuffle: true,
+      callbacks: {
+        onEpochEnd: async (epoch, logs) => {
+          if (trainAbort.signal.aborted) { classifierModel.stopTraining = true; return; }
+          lossHistory.push(logs.loss);
+          accHistory.push(logs.acc || logs.accuracy || 0);
+          $('#metricEpoch').textContent = (epoch + 1) + '/' + epochs;
+          $('#metricLoss').textContent = (logs.loss || 0).toFixed(4);
+          $('#metricAcc').textContent = ((logs.acc || logs.accuracy || 0) * 100).toFixed(1) + '%';
+          $('#trainProgressFill').style.width = ((epoch + 1) / epochs * 100) + '%';
+          if (epoch % 3 === 0) { drawTrainChart(); await tf.nextFrame(); }
+        }
+      }
+    });
+    xTensor.dispose();
+    yTensor.dispose();
+    classifierTrained = true;
+    await saveClassifier();
+    $('#trainModelStatus').textContent = 'обучена ✓';
+    $('#statClassifier').textContent = 'обучен';
+    toast('Обучение завершено');
+  } catch (e) {
+    toast('Ошибка: ' + e.message);
+  } finally {
+    trainAbort = null;
+    $('#btnTrain').disabled = false;
+    $('#btnCancelTrain').disabled = true;
+    $('#trainProgress').classList.remove('show');
+  }
+}
+
+function drawTrainChart() {
+  const canvas = $('#trainChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, W, H);
+  if (lossHistory.length < 2) return;
+  const minL = Math.min(...lossHistory);
+  const maxL = Math.max(...lossHistory);
+  const rangeL = (maxL - minL) || 1;
+  ctx.strokeStyle = '#00d2ff';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i < lossHistory.length; i++) {
+    const x = (i / (lossHistory.length - 1)) * W;
+    const y = H - ((lossHistory[i] - minL) / rangeL) * (H - 10) - 5;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.strokeStyle = '#00e676';
+  ctx.beginPath();
+  for (let i = 0; i < accHistory.length; i++) {
+    const x = (i / (accHistory.length - 1)) * W;
+    const y = H - accHistory[i] * (H - 10) - 5;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+}
+
+function predictType(text) {
+  if (!classifierTrained || !classifierModel) return null;
+  try {
+    const maxLen = 24;
+    const ids = encodeText(text, maxLen);
+    const input = tf.tensor2d([ids], [1, maxLen], 'float32');
+    const pred = classifierModel.predict(input);
+    const data = pred.dataSync();
+    input.dispose();
+    pred.dispose();
+    let maxIdx = 0, maxVal = data[0];
+    for (let i = 1; i < data.length; i++) {
+      if (data[i] > maxVal) { maxVal = data[i]; maxIdx = i; }
+    }
+    return { type: classifierLabels[maxIdx], confidence: maxVal };
+  } catch (e) { return null; }
+}
+
+async function saveClassifier() {
+  if (!classifierModel) return;
+  try {
+    await classifierModel.save(tf.io.withSaveHandler(async (artifacts) => {
+      await idbPut('classifier', { key: 'topology', data: artifacts.modelTopology });
+      await idbPut('classifier', { key: 'weights', data: artifacts.weightData });
+      await idbPut('classifier', { key: 'specs', data: artifacts.weightSpecs });
+      await idbPut('classifier', { key: 'vocab', data: classifierVocab });
+      await idbPut('classifier', { key: 'labels', data: classifierLabels });
+      return { modelArtifactsInfo: { dateSaved: new Date() } };
+    }));
+  } catch (e) { logMsg('save: ' + e.message); }
+}
+
+async function loadClassifier() {
+  try {
+    const topology = await idbGet('classifier', 'topology');
+    const weights = await idbGet('classifier', 'weights');
+    const specs = await idbGet('classifier', 'specs');
+    const vocab = await idbGet('classifier', 'vocab');
+    const labels = await idbGet('classifier', 'labels');
+    if (!topology || !weights) return;
+    classifierVocab = vocab.data;
+    classifierLabels = labels.data;
+    classifierModel = await tf.loadLayersModel(tf.io.fromMemory({
+      modelTopology: topology.data,
+      weightSpecs: specs.data,
+      weightData: weights.data
+    }));
+    classifierModel.compile({
+      optimizer: tf.train.adam(0.005),
+      loss: 'categoricalCrossentropy',
+      metrics: ['accuracy']
+    });
+    classifierTrained = true;
+    $('#trainModelStatus').textContent = 'загружена ✓';
+    $('#statClassifier').textContent = 'обучен';
+  } catch (e) { logMsg('load: ' + e.message); }
+}
+
+/* ============================================================
+   ЛОКАЛЬНЫЙ ИИ — QWEN 2.5 1.5B
+   ============================================================ */
+let aiPipeline = null;
+let aiLoading = false;
+let aiDevice = '—';
+let aiCurrentPrompt = 'Ты — учитель математики. Отвечай по-русски. Объясняй пошагово. Используй LaTeX для формул (оборачивай в $...$).';
+
+async function loadAI() {
+  if (aiPipeline || aiLoading) return;
+  if (typeof transformers === 'undefined') { toast('transformers.js не загружен'); return; }
+  aiLoading = true;
+  $('#aiLoadProgress').classList.add('show');
+  $('#btnLoadAI').disabled = true;
+  $('#aiModelStatus').textContent = 'загружается...';
+
+  try {
+    const hasWebGPU = !!navigator.gpu;
+    const device = hasWebGPU ? 'webgpu' : 'wasm';
+    aiDevice = device;
+    $('#aiDevice').textContent = device;
+
+    logMsg('🤖 Загрузка Qwen2.5-1.5B-Instruct (' + device + ')...');
+    logMsg('💡 Модель ~1 ГБ. Первая загрузка 5-15 минут.');
+
+    aiPipeline = await transformers.pipeline(
+      'text-generation',
+      'onnx-community/Qwen2.5-1.5B-Instruct',
+      {
+        dtype: device === 'webgpu' ? 'q4f16' : 'q4',
+        device: device,
+        progress_callback: (p) => {
+          if (p.status === 'progress') {
+            const pct = Math.round(p.progress || 0);
+            $('#aiLoadFill').style.width = pct + '%';
+            if (p.file) logMsg(`📦 ${p.file}: ${pct}%`);
+          } else if (p.status === 'ready') {
+            logMsg('✅ Модель готова');
+          }
+        }
+      }
+    );
+
+    $('#aiModelStatus').textContent = 'загружена ✓';
+    $('#btnLoadAI').disabled = true;
+    $('#btnUnloadAI').disabled = false;
+    $('#aiLoadProgress').classList.remove('show');
+    toast('Qwen2.5-1.5B готова');
+    logMsg('✅ Модель загружена на ' + device);
+  } catch (e) {
+    logMsg('❌ Ошибка: ' + e.message);
+    $('#aiModelStatus').textContent = 'ошибка';
+    $('#btnLoadAI').disabled = false;
+    $('#aiLoadProgress').classList.remove('show');
+    toast('Ошибка: ' + e.message);
+  } finally {
+    aiLoading = false;
+  }
+}
+
+async function unloadAI() {
+  if (!aiPipeline) return;
+  try {
+    if (aiPipeline.dispose) await aiPipeline.dispose();
+    aiPipeline = null;
+    $('#aiModelStatus').textContent = 'не загружена';
+    $('#btnLoadAI').disabled = false;
+    $('#btnUnloadAI').disabled = true;
+    toast('Модель выгружена');
+  } catch (e) {
+    toast('Ошибка: ' + e.message);
+  }
+}
+
+async function askAI(userMessage, options = {}) {
+  if (!aiPipeline) {
+    await loadAI();
+    if (!aiPipeline) return null;
+  }
+  const maxTokens = options.maxTokens || parseInt($('#aiMaxTokens').value) || 512;
+  const temperature = options.temperature !== undefined ? options.temperature : (parseFloat($('#aiTemperature').value) || 0.3);
+  const systemPrompt = options.systemPrompt || aiCurrentPrompt;
+
+  const messages = [
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: userMessage }
+  ];
+
+  try {
+    const output = await aiPipeline(messages, {
+      max_new_tokens: maxTokens,
+      temperature: temperature,
+      do_sample: temperature > 0,
+      top_p: 0.9,
+      repetition_penalty: 1.1
+    });
+
+    let responseText = '';
+    if (output && output[0]) {
+      const gen = output[0].generated_text;
+      if (Array.isArray(gen)) {
+        const lastMsg = gen[gen.length - 1];
+        responseText = lastMsg.content || '';
+      } else if (typeof gen === 'string') {
+        responseText = gen;
+      }
+    }
+    return responseText;
+  } catch (e) {
+    logMsg('❌ ИИ: ' + e.message);
+    return null;
+  }
+}
+
+function renderChatMessage(role, text) {
+  const container = $('#aiChat');
+  const div = document.createElement('div');
+  div.className = 'chat-msg ' + (role === 'user' ? 'user' : 'ai');
+  div.innerHTML = `<div class="role">${role === 'user' ? 'Ты' : '🤖 Qwen'}</div>`;
+
+  const content = document.createElement('div');
+  content.className = 'chat-content';
+
+  const parts = text.split(/(\$[^$]+\$)/g);
+  for (const part of parts) {
+    if (part.startsWith('$') && part.endsWith('$')) {
+      const formula = document.createElement('div');
+      formula.className = 'formula';
+      renderKatex(formula, part.slice(1, -1), false);
+      content.appendChild(formula);
+    } else {
+      const txt = document.createElement('div');
+      txt.textContent = part;
+      content.appendChild(txt);
+    }
+  }
+  div.appendChild(content);
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+async function sendAIMessage(userText) {
+  if (!userText.trim()) return;
+  renderChatMessage('user', userText);
+  $('#aiInput').value = '';
+
+  const loadingDiv = document.createElement('div');
+  loadingDiv.className = 'chat-msg ai';
+  loadingDiv.innerHTML = '<div class="role">🤖 Qwen</div><div><span class="ai-loading"></span> думает...</div>';
+  $('#aiChat').appendChild(loadingDiv);
+  $('#aiChat').scrollTop = $('#aiChat').scrollHeight;
+
+  const response = await askAI(userText);
+  loadingDiv.remove();
+
+  if (response) {
+    renderChatMessage('ai', response);
+    await saveToDataset(userText, response, { verified: false, source: 'ai-chat' });
+  } else {
+    renderChatMessage('ai', '❌ Не удалось получить ответ.');
+  }
+}
+
+/* ============================================================
+   ДАТАСЕТ
+   ============================================================ */
+async function saveToDataset(userMessage, assistantMessage, options = {}) {
+  const entry = {
+    id: uid(),
+    date: new Date().toISOString(),
+    verified: options.verified === true,
+    source: options.source || 'unknown',
+    messages: [
+      { role: 'user', content: userMessage },
+      { role: 'assistant', content: assistantMessage }
+    ]
+  };
+  await idbPut('dataset', entry);
+  await updateDatasetStats();
+}
+
+async function updateDatasetStats() {
+  const all = await idbGetAll('dataset');
+  const verified = all.filter(e => e.verified).length;
+  const unverified = all.length - verified;
+
+  $('#datasetCount').textContent = all.length;
+  $('#datasetVerified').textContent = verified;
+  $('#datasetUnverified').textContent = unverified;
+  $('#statDataset').textContent = all.length;
+
+  const jsonl = all.map(e => JSON.stringify({ messages: e.messages })).join('\n');
+  $('#datasetSize').textContent = (new Blob([jsonl]).size / 1024).toFixed(1) + ' КБ';
+
+  const preview = all.slice(-5).map(e => {
+    const flag = e.verified ? '✅' : '⚠️';
+    return `[${flag} ${e.source}] ${new Date(e.date).toLocaleString()}\n` +
+      `П: ${e.messages[0].content.substring(0, 100)}\n` +
+      `О: ${e.messages[1].content.substring(0, 100)}\n`;
+  }).join('\n---\n');
+  $('#datasetPreview').textContent = preview || 'Пусто';
+}
+
+async function exportDataset(onlyVerified = false) {
+  let all = await idbGetAll('dataset');
+  if (onlyVerified) all = all.filter(e => e.verified);
+  if (all.length === 0) { toast('Датасет пуст'); return; }
+  const jsonl = all.map(e => JSON.stringify({ messages: e.messages })).join('\n');
+  const name = onlyVerified ? 'geometry-verified-' : 'geometry-dataset-';
+  downloadBlob(new Blob([jsonl], { type: 'application/jsonl' }), name + Date.now() + '.jsonl');
+  toast('Скачано: ' + all.length);
+}
+
+async function importDataset(file) {
+  const text = await file.text();
+  const lines = text.trim().split('\n').filter(l => l.trim());
+  let imported = 0;
+  for (const line of lines) {
+    try {
+      const obj = JSON.parse(line);
+      if (obj.messages && Array.isArray(obj.messages)) {
+        await idbPut('dataset', {
+          id: uid(),
+          date: new Date().toISOString(),
+          verified: obj.verified === true,
+          source: obj.source || 'imported',
+          messages: obj.messages
+        });
+        imported++;
+      }
+    } catch (e) {}
+  }
+  await updateDatasetStats();
+  toast('Импортировано: ' + imported);
+}
+
+async function verifyDataset() {
+  const all = await idbGetAll('dataset');
+  let checked = 0, corrected = 0;
+  for (const entry of all) {
+    if (entry.verified) continue;
+    const task = entry.messages[0].content;
+    const ruleResult = detectAndSolve(task);
+    if (ruleResult) {
+      // Правило сработало — обновляем запись как verified
+      entry.verified = true;
+      entry.source = 'rules-verified';
+      entry.messages[1].content = buildAnswerText(ruleResult);
+      await idbPut('dataset', entry);
+      corrected++;
+    }
+    checked++;
+  }
+  await updateDatasetStats();
+  toast(`Проверено: ${checked}, исправлено: ${corrected}`);
+}
+
+/* ============================================================
+   КАМЕРА
+   ============================================================ */
+let cameraStream = null;
+let cameraFacing = 'environment';
+let currentSnapshot = null;
+let currentPhotoFile = null;
+
+async function startCamera() {
+  try {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(t => t.stop());
+    }
+    cameraStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: cameraFacing, width: { ideal: 1280 }, height: { ideal: 720 } }
+    });
+    const video = $('#cameraVideo');
+    video.srcObject = cameraStream;
+    video.style.display = 'block';
+    $('#cameraStatus').textContent = 'активна (' + cameraFacing + ')';
+    $('#btnStartCamera').disabled = true;
+    $('#btnStopCamera').disabled = false;
+    $('#cameraControls').style.display = 'flex';
+    $('#snapshotPreview').style.display = 'none';
+    $('#snapshotActions').style.display = 'none';
+    $('#cameraOCRResult').style.display = 'none';
+    $('#cameraSolution').innerHTML = '';
+  } catch (e) {
+    $('#cameraStatus').textContent = 'ошибка';
+    toast('Камера недоступна: ' + e.message);
+    logMsg('Камера: ' + e.message);
+  }
+}
+
+function stopCamera() {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(t => t.stop());
+    cameraStream = null;
+  }
+  $('#cameraVideo').style.display = 'none';
+  $('#cameraStatus').textContent = 'не активна';
+  $('#btnStartCamera').disabled = false;
+  $('#btnStopCamera').disabled = true;
+  $('#cameraControls').style.display = 'none';
+}
+
+function switchCamera() {
+  cameraFacing = cameraFacing === 'environment' ? 'user' : 'environment';
+  if (cameraStream) startCamera();
+}
+
+function takeSnapshot() {
+  const video = $('#cameraVideo');
+  const canvas = $('#cameraCanvas');
+  canvas.width = video.videoWidth || 1280;
+  canvas.height = video.videoHeight || 720;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  canvas.toBlob(blob => {
+    currentSnapshot = blob;
+    const url = URL.createObjectURL(blob);
+    $('#snapshotPreview').src = url;
+    $('#snapshotPreview').style.display = 'block';
+    $('#snapshotActions').style.display = 'flex';
+    toast('Фото сделано');
+  }, 'image/jpeg', 0.9);
+}
+
+async function solveFromSnapshot() {
+  if (!currentSnapshot) { toast('Нет фото'); return; }
+
+  const file = new File([currentSnapshot], 'snapshot.jpg', { type: 'image/jpeg' });
+  await solveFromImageFile(file, '#cameraOCRResult', '#cameraSolution');
+}
+
+async function solveFromImageFile(file, ocrResultSelector, solutionSelector) {
+  // 1. Обрабатываем через Florence-2 OCR (если загружен) или через Qwen vision (нет).
+  // У нас нет vision-модели, используем Florence-2 для OCR.
+  if (!ocrPipeline) {
+    const ok = await loadOCRModel();
+    if (!ok) { toast('Florence-2 не загружена'); return; }
+  }
+
+  try {
+    const ocrEl = $(ocrResultSelector);
+    ocrEl.style.display = 'block';
+    ocrEl.textContent = '🔍 Распознавание текста...';
+
+    const dataUrl = await new Promise(resolve => {
+      const r = new FileReader();
+      r.onload = e => resolve(e.target.result);
+      r.readAsDataURL(file);
+    });
+
+    const output = await ocrPipeline(dataUrl, { task_prompt: '<OCR>', max_new_tokens: 512 });
+    const recognizedText = output[0]?.generated_text || '';
+    ocrEl.textContent = '📝 Распознано:\n\n' + recognizedText;
+
+    if (!recognizedText.trim()) {
+      toast('Не удалось распознать текст');
+      return;
+    }
+
+    // 2. Ищем задачи в тексте
+    const tasks = extractTasksFromPage(recognizedText);
+    let taskToSolve = recognizedText;
+    if (tasks.length > 0) taskToSolve = tasks[0];
+
+    // 3. Решаем
+    const solEl = $(solutionSelector);
+    solEl.innerHTML = '<div class="small" style="color:var(--fg2)">🤖 Решение...</div>';
+
+    let result = detectAndSolve(taskToSolve);
+
+    if (!result && aiPipeline) {
+      // Через Qwen
+      const prompt = `Реши задачу пошагово. Ответь СТРОГО в формате JSON:
+{"steps":[{"text":"пояснение","latex":"формула"}],"answerLatex":"ответ","answer":"ответ текстом"}
+Задача: ${taskToSolve}`;
+      const aiResp = await askAI(prompt, { temperature: 0.1, maxTokens: 700 });
+      if (aiResp) {
+        try {
+          const jsonMatch = aiResp.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0]);
+            result = {
+              ruleName: 'Qwen2.5-1.5B',
+              ruleKey: 'ai',
+              steps: parsed.steps || [],
+              answerLatex: parsed.answerLatex || parsed.answer || '',
+              answer: parsed.answer || ''
+            };
+          } else {
+            result = {
+              ruleName: 'Qwen2.5-1.5B',
+              ruleKey: 'ai',
+              steps: [{ text: aiResp, latex: '' }],
+              answerLatex: '',
+              answer: ''
+            };
+          }
+        } catch (e) {}
+      }
+    }
+
+    if (!result) {
+      solEl.innerHTML = '<div class="solution-error">Не удалось решить задачу</div>';
+      return;
+    }
+
+    // 4. Отображаем
+    solEl.innerHTML = '';
+    const stepsDiv = document.createElement('div');
+    result.steps.forEach((s, i) => {
+      const d = document.createElement('div');
+      d.className = 'solution-step';
+      d.innerHTML = `<span class="num">${i+1}</span>${escapeHtml(s.text)}`;
+      if (s.latex) {
+        const f = document.createElement('div');
+        f.className = 'formula';
+        renderKatex(f, s.latex, true);
+        d.appendChild(f);
+      }
+      stepsDiv.appendChild(d);
+    });
+    solEl.appendChild(stepsDiv);
+
+    const answerDiv = document.createElement('div');
+    answerDiv.className = 'solution-answer';
+    const af = document.createElement('div');
+    af.id = 'ocrAnswerFormula';
+    answerDiv.innerHTML = '<div>✅ Ответ:</div>';
+    answerDiv.appendChild(af);
+    solEl.appendChild(answerDiv);
+    if (result.answerLatex) {
+      renderKatex(af, result.answerLatex, true);
+    } else {
+      af.textContent = result.answer;
+    }
+
+    // 5. Чертёж
+    const figDiv = document.createElement('div');
+    figDiv.className = 'mt';
+    solEl.appendChild(figDiv);
+    drawTaskFigure(taskToSolve, figDiv);
+
+    toast('Готово');
+  } catch (e) {
+    toast('Ошибка OCR: ' + e.message);
+    logMsg('OCR: ' + e.message);
+  }
+}
+
+/* ============================================================
+   OCR FLORENCE-2
+   ============================================================ */
+let ocrPipeline = null;
+let ocrImage = null;
+let ocrLastResult = '';
+let ocrLastMode = '<OCR>';
+
+async function loadOCRModel() {
+  if (typeof transformers === 'undefined') { toast('transformers.js не загружен'); return false; }
+  if (ocrPipeline) return true;
+  try {
+    logMsg('📥 Загрузка Florence-2...');
+    $('#ocrModelStatus').textContent = 'загружается...';
+    $('#btnLoadOCR').disabled = true;
+    $('#ocrLoadProgress').classList.add('show');
+    ocrPipeline = await transformers.pipeline(
+      'image-to-text',
+      'onnx-community/Florence-2-base-ft',
+      {
+        dtype: 'q4',
+        device: navigator.gpu ? 'webgpu' : 'wasm',
+        progress_callback: (p) => {
+          if (p.status === 'progress') {
+            $('#ocrLoadFill').style.width = Math.round(p.progress) + '%';
+          }
+        }
+      }
+    );
+    $('#ocrModelStatus').textContent = 'загружена ✓';
+    $('#btnLoadOCR').disabled = false;
+    $('#btnLoadOCR').textContent = '✓ Florence-2 готова';
+    $('#ocrLoadProgress').classList.remove('show');
+    toast('Florence-2 загружена');
+    return true;
+  } catch (e) {
+    $('#ocrModelStatus').textContent = 'ошибка';
+    $('#btnLoadOCR').disabled = false;
+    $('#ocrLoadProgress').classList.remove('show');
+    toast('Ошибка: ' + e.message);
+    return false;
+  }
+}
+
+async function runOCR(file, mode) {
+  if (!ocrPipeline) { const ok = await loadOCRModel(); if (!ok) return; }
+  try {
+    $('#ocrProgress').style.display = 'block';
+    const dataUrl = await new Promise(resolve => {
+      const r = new FileReader();
+      r.onload = e => resolve(e.target.result);
+      r.readAsDataURL(file);
+    });
+    $('#ocrPreview').src = dataUrl;
+    $('#ocrPreview').style.display = 'block';
+    ocrImage = dataUrl;
+    $('#ocrProgressText').textContent = 'OCR ' + mode + '...';
+    ocrLastMode = mode;
+    const output = await ocrPipeline(dataUrl, { task_prompt: mode, max_new_tokens: 512 });
+    ocrLastResult = output[0]?.generated_text || '';
+    $('#ocrResult').textContent = ocrLastResult;
+    $('#ocrResult').style.display = 'block';
+    $('#ocrActions').style.display = 'flex';
+    $('#ocrProgress').style.display = 'none';
+    toast('Готово');
+  } catch (e) {
+    $('#ocrProgress').style.display = 'none';
+    toast('Ошибка: ' + e.message);
+  }
+}
+
+/* ============================================================
+   PDF
+   ============================================================ */
+let pdfDoc = null;
+let pdfCurrentPage = 1;
+
+async function loadPDF(file) {
+  if (!window.pdfjsLib) { toast('PDF.js не загружен'); return; }
+  try {
+    const buf = await file.arrayBuffer();
+    pdfDoc = await pdfjsLib.getDocument({ data: buf }).promise;
+    $('#pdfName').textContent = file.name;
+    $('#pdfPages').textContent = pdfDoc.numPages;
+    pdfCurrentPage = 1;
+    toast('PDF: ' + pdfDoc.numPages + ' стр.');
+    await renderPdfPage(1);
+  } catch (e) { toast('Ошибка: ' + e.message); }
+}
+
+async function renderPdfPage(num) {
+  if (!pdfDoc) return;
+  const page = await pdfDoc.getPage(num);
+  const viewport = page.getViewport({ scale: 1.5 });
+  const canvas = $('#pdfCanvas');
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+  canvas.style.display = 'block';
+  const ctx = canvas.getContext('2d');
+  await page.render({ canvasContext: ctx, viewport }).promise;
+
+  const textContent = await page.getTextContent();
+  const pageWidth = viewport.width;
+  const midX = pageWidth / 2;
+
+  const leftItems = [], rightItems = [], wideItems = [];
+
+  for (const item of textContent.items) {
+    const x = item.transform[4];
+    const w = item.width || 0;
+    if (x < midX - 20 && x + w > midX + 20) wideItems.push(item);
+    else if (x + w/2 < midX) leftItems.push(item);
+    else rightItems.push(item);
+  }
+
+  function groupIntoLines(items) {
+    const lines = {};
+    for (const item of items) {
+      const y = Math.round(item.transform[5]);
+      if (!lines[y]) lines[y] = [];
+      lines[y].push(item);
+    }
+    const sortedY = Object.keys(lines).map(Number).sort((a, b) => b - a);
+    const result = [];
+    for (const y of sortedY) {
+      const line = lines[y].sort((a, b) => a.transform[4] - b.transform[4]);
+      const text = line.map(i => i.str).join(' ').trim();
+      if (text) result.push({ y, text, side: 'line' });
+    }
+    return result;
+  }
+
+  const leftLines = groupIntoLines(leftItems).map(l => ({ ...l, side: 'left' }));
+  const rightLines = groupIntoLines(rightItems).map(l => ({ ...l, side: 'right' }));
+  const wideLines = groupIntoLines(wideItems).map(l => ({ ...l, side: 'wide' }));
+
+  const allLines = [...leftLines, ...rightLines, ...wideLines];
+  allLines.sort((a, b) => b.y - a.y);
+
+  let text = '';
+  let prevSide = null;
+  for (const line of allLines) {
+    if (prevSide && prevSide !== line.side && line.side !== 'wide') text += '\n';
+    text += line.text + '\n';
+    prevSide = line.side;
+  }
+
+  const cleaned = cleanPdfText(text);
+  $('#pdfPageText').textContent = cleaned || '(нет текста)';
+  $('#pdfPageText').style.display = 'block';
+  $('#pdfCurrentPage').textContent = num;
+  pdfCurrentPage = num;
+}
+
+/* ============================================================
+   ПРОСТОЕ РИСОВАНИЕ (вкладка "Рисовать")
+   ============================================================ */
+const drawCanvas = $('#drawCanvas');
+
+function drawSimpleShape(text) {
+  const container = document.createElement('div');
+  container.style.position = 'absolute';
+  container.style.left = '-9999px';
+  document.body.appendChild(container);
+  const c = document.createElement('canvas');
+  c.width = 600;
+  c.height = 500;
+  container.appendChild(c);
+
+  const fig = parseTaskToFigure(text);
+  if (fig) {
+    const figure = buildFigureFromParse(fig, c);
+    if (figure) {
+      figure.render();
+      // Копируем в основной canvas
+      const ctx = drawCanvas.getContext('2d');
+      ctx.drawImage(c, 0, 0);
+      container.remove();
+      return;
+    }
+  }
+
+  // fallback — базовое рисование
+  const ctx = drawCanvas.getContext('2d');
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
+  ctx.fillStyle = '#333';
+  ctx.font = '14px sans-serif';
+  ctx.fillText('Не распознано: ' + text, 20, 40);
+  container.remove();
+}
+
+/* ============================================================
+   ГРАФИКИ
+   ============================================================ */
+const plotCanvas = $('#plotCanvas');
+const ctxPlot = plotCanvas.getContext('2d');
+
+function parseFunction(expr) {
+  let e = expr.trim().replace(/\s+/g, '');
+  e = e.replace(/(\d)x/g, '$1*x');
+  e = e.replace(/x(\d)/g, 'x*$1');
+  e = e.replace(/(\d)\(/g, '$1*(');
+  e = e.replace(/\)(\d)/g, ')*$1');
+  e = e.replace(/\)\(/g, ')*(');
+  e = e.replace(/\^/g, '**');
+  try {
+    return new Function('x', 'with(Math){return ' + e + ';}');
+  } catch (err) { return null; }
+}
+
+function drawPlot() {
+  const expr = $('#plotInput').value.trim();
+  if (!expr) { toast('Введи функцию'); return; }
+  const m = expr.match(/y\s*=\s*(.+)/i);
+  const body = m ? m[1].trim() : expr;
+  const fn = parseFunction(body);
+  if (!fn) { toast('Не могу разобрать функцию'); return; }
+
+  const xmin = +$('#plotXMin').value || -10;
+  const xmax = +$('#plotXMax').value || 10;
+  const ymin = +$('#plotYMin').value || -10;
+  const ymax = +$('#plotYMax').value || 10;
+
+  const W = plotCanvas.width, H = plotCanvas.height;
+  ctxPlot.fillStyle = '#fff';
+  ctxPlot.fillRect(0, 0, W, H);
+  const pad = 40;
+  const cw = W - pad*2, ch = H - pad*2;
+  const xToPx = x => pad + (x - xmin) / (xmax - xmin) * cw;
+  const yToPx = y => H - pad - (y - ymin) / (ymax - ymin) * ch;
+
+  ctxPlot.strokeStyle = '#e0e0e0';
+  ctxPlot.lineWidth = 0.5;
+  for (let x = Math.ceil(xmin); x <= xmax; x++) {
+    ctxPlot.beginPath(); ctxPlot.moveTo(xToPx(x), pad);
+    ctxPlot.lineTo(xToPx(x), H - pad); ctxPlot.stroke();
+  }
+  for (let y = Math.ceil(ymin); y <= ymax; y++) {
+    ctxPlot.beginPath(); ctxPlot.moveTo(pad, yToPx(y));
+    ctxPlot.lineTo(W - pad, yToPx(y)); ctxPlot.stroke();
+  }
+  ctxPlot.strokeStyle = '#333';
+  ctxPlot.lineWidth = 1.5;
+  if (ymin <= 0 && ymax >= 0) {
+    ctxPlot.beginPath(); ctxPlot.moveTo(pad, yToPx(0));
+    ctxPlot.lineTo(W - pad, yToPx(0)); ctxPlot.stroke();
+  }
+  if (xmin <= 0 && xmax >= 0) {
+    ctxPlot.beginPath(); ctxPlot.moveTo(xToPx(0), pad);
+    ctxPlot.lineTo(xToPx(0), H - pad); ctxPlot.stroke();
+  }
+
+  ctxPlot.strokeStyle = '#0066ff';
+  ctxPlot.lineWidth = 2;
+  ctxPlot.beginPath();
+  let started = false;
+  const step = (xmax - xmin) / 2000;
+  for (let x = xmin; x <= xmax; x += step) {
+    let y;
+    try { y = fn(x); } catch (e) { y = NaN; }
+    if (isFinite(y) && y >= ymin && y <= ymax) {
+      const px = xToPx(x), py = yToPx(y);
+      if (!started) { ctxPlot.moveTo(px, py); started = true; }
+      else ctxPlot.lineTo(px, py);
+    } else started = false;
+  }
+  ctxPlot.stroke();
+  ctxPlot.fillStyle = '#0066ff';
+  ctxPlot.font = 'bold 14px sans-serif';
+  ctxPlot.fillText('y = ' + body, 10, 20);
+}
+
+function plotClear() {
+  ctxPlot.fillStyle = '#fff';
+  ctxPlot.fillRect(0, 0, plotCanvas.width, plotCanvas.height);
+}
+
+/* ============================================================
+   UI — РЕШЕНИЕ
+   ============================================================ */
+let currentSolveMode = 'auto';
+let lastSolution = null;
+
+function renderExamples() {
+  const solveEx = [
+    'площадь круга r=5',
+    'длина окружности r=5',
+    'площадь квадрата a=5',
+    'периметр квадрата a=5',
+    'площадь прямоугольника a=4 b=5',
+    'периметр прямоугольника a=4 b=5',
+    'площадь треугольника a=6 h=4',
+    'площадь треугольника стороны 3 4 5',
+    'площадь трапеции a=4 b=6 h=3',
+    'площадь параллелограмма a=5 h=3',
+    'площадь ромба d1=4 d2=6',
+    'площадь сектора R=5 alpha=60',
+    'объём куба a=3',
+    'найди гипотенузу если катеты 3 и 4',
+    'найди расстояние между точками A(1;2) и B(4;6)',
+    'найди середину отрезка A(1;2) B(5;8)',
+    'скалярное произведение a(1;2) b(3;4)',
+    '3/4 + 2/5', 'сократить 12/18',
+    '15% от 200',
+    'x^2 - 5x + 6 = 0',
+    'дискриминант 1 -5 6',
+    'теорема виета x² - 5x + 6'
+  ];
+  const el = $('#exampleButtons');
+  el.innerHTML = '';
+  for (const ex of solveEx) {
+    const b = document.createElement('span');
+    b.className = 'example-btn';
+    b.textContent = ex;
+    b.onclick = () => { $('#taskInput').value = ex; solveAndShow(); };
+    el.appendChild(b);
+  }
+
+  const drawEx = [
+    'ромб ABCD диагонали 6 и 8',
+    'треугольник ABC AB=5 BC=6 CA=7',
+    'прямоугольный треугольник катеты 3 и 4',
+    'квадрат ABCD сторона 5',
+    'трапеция ABCD основания 8 и 4 высота 3',
+    'прямоугольник ABCD стороны 6 и 4',
+    'окружность с центром O радиуса 5',
+    'треугольник ABC биссектриса AD',
+    'треугольник ABC медиана AM',
+    'треугольник ABC высота AH',
+    'вектор (3; 4)'
+  ];
+  const el2 = $('#drawExampleButtons');
+  el2.innerHTML = '';
+  for (const ex of drawEx) {
+    const b = document.createElement('span');
+    b.className = 'example-btn';
+    b.textContent = ex;
+    b.onclick = () => { $('#drawInput').value = ex; drawSimpleShape(ex); };
+    el2.appendChild(b);
+  }
+
+  const plotEx = ['y = x^2', 'y = x^2 - 4x + 3', 'y = 2x + 1', 'y = -x + 3', 'y = 6/x', 'y = sqrt(x)'];
+  const el3 = $('#plotExamples');
+  el3.innerHTML = '';
+  for (const ex of plotEx) {
+    const b = document.createElement('span');
+    b.className = 'example-btn';
+    b.textContent = ex;
+    b.onclick = () => { $('#plotInput').value = ex; drawPlot(); };
+    el3.appendChild(b);
+  }
+}
+
+async function solveAndShow() {
+  const raw = $('#taskInput').value.trim();
+  if (!raw) { toast('Введи задачу'); return; }
+  const text = normalizeInput(raw);
+  const card = $('#solutionCard');
+  card.style.display = 'block';
+  $('#solutionSteps').innerHTML = '';
+  $('#solutionAnswer').innerHTML = '';
+  $('#figureContainer').innerHTML = '';
+  $('#neuralPrediction').style.display = 'none';
+
+  const pred = predictType(text);
+  if (pred && pred.confidence > 0.3) {
+    $('#neuralPrediction').textContent = `🧠 Классификатор: ${pred.type} (${(pred.confidence * 100).toFixed(0)}%)`;
+    $('#neuralPrediction').style.display = 'block';
+  }
+
+  let result = null;
+
+  if (currentSolveMode === 'auto' || currentSolveMode === 'rules') {
+    result = detectAndSolve(text);
+  }
+
+  if (!result && (currentSolveMode === 'auto' || currentSolveMode === 'ai')) {
+    if (!aiPipeline) {
+      $('#detectedType').textContent = 'Тип: нужен ИИ';
+      $('#solutionAnswer').innerHTML = '<div class="solution-error">🤖 Локальный ИИ не загружен. Перейди во вкладку «🤖 Локальный ИИ» и загрузи Qwen2.5-1.5B.</div>';
+      return;
+    }
+
+    $('#detectedType').textContent = 'Тип: Qwen2.5-1.5B';
+    const loading = document.createElement('div');
+    loading.className = 'solution-step';
+    loading.innerHTML = '<span class="num">⏳</span> ИИ думает... (30-60 секунд)';
+    $('#solutionSteps').appendChild(loading);
+
+    const prompt = `Реши задачу пошагово. Ответь СТРОГО в формате JSON:
+{"steps":[{"text":"пояснение","latex":"формула"}],"answerLatex":"ответ","answer":"ответ текстом"}
+Задача: ${raw}`;
+
+    const aiResponse = await askAI(prompt, { temperature: 0.1, maxTokens: 800 });
+    loading.remove();
+
+    if (aiResponse) {
+      try {
+        const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          result = {
+            ruleName: 'Qwen2.5-1.5B',
+            ruleKey: 'ai',
+            steps: parsed.steps || [],
+            answerLatex: parsed.answerLatex || parsed.answer || '',
+            answer: parsed.answer || ''
+          };
+        } else {
+          result = {
+            ruleName: 'Qwen2.5-1.5B (свободный)',
+            ruleKey: 'ai',
+            steps: [{ text: aiResponse, latex: '' }],
+            answerLatex: '',
+            answer: ''
+          };
+        }
+      } catch (e) {
+        result = {
+          ruleName: 'Qwen2.5-1.5B',
+          ruleKey: 'ai',
+          steps: [{ text: aiResponse, latex: '' }],
+          answerLatex: '',
+          answer: ''
+        };
+      }
+      if (aiResponse) await saveToDataset(raw, aiResponse, { verified: false, source: 'ai-solve' });
+    } else {
+      $('#detectedType').textContent = 'Тип: ошибка ИИ';
+      $('#solutionAnswer').innerHTML = '<div class="solution-error">❌ Не удалось получить ответ от ИИ</div>';
+      return;
+    }
+  }
+
+  if (!result) {
+    $('#detectedType').textContent = 'Тип: не распознан';
+    $('#solutionAnswer').innerHTML = '<div class="solution-error">Не удалось распознать задачу локальными правилами. Попробуй режим «Только ИИ».</div>';
+    return;
+  }
+
+  $('#detectedType').textContent = 'Тип: ' + result.ruleName;
+  result.steps.forEach((s, i) => {
+    const d = document.createElement('div');
+    d.className = 'solution-step';
+    const num = document.createElement('span');
+    num.className = 'num';
+    num.textContent = i + 1;
+    d.appendChild(num);
+    const textSpan = document.createElement('span');
+    textSpan.textContent = s.text;
+    d.appendChild(textSpan);
+    if (s.latex) {
+      const formulaDiv = document.createElement('div');
+      formulaDiv.className = 'formula';
+      renderKatex(formulaDiv, s.latex, true);
+      d.appendChild(formulaDiv);
+    }
+    $('#solutionSteps').appendChild(d);
+  });
+
+  const answerDiv = $('#solutionAnswer');
+  answerDiv.innerHTML = '<div class="solution-answer"><div>✅ Ответ:</div><div id="answerFormula"></div></div>';
+  if (result.answerLatex) {
+    renderKatex($('#answerFormula'), result.answerLatex, true);
+  } else if (result.answer) {
+    $('#answerFormula').textContent = result.answer;
+  } else {
+    $('#answerFormula').textContent = '(см. шаги)';
+  }
+
+  // Рисуем чертёж
+  drawTaskFigure(raw, $('#figureContainer'));
+
+  const cur = +$('#statSolved').textContent || 0;
+  $('#statSolved').textContent = cur + 1;
+  lastSolution = { text: raw, result };
+
+  // Сохраняем в датасет (verified для правил)
+  if (result.ruleKey !== 'ai') {
+    await saveToDataset(raw, buildAnswerText(result), { verified: true, source: 'rules-solve' });
+  }
+}
+
+/* ============================================================
+   ГЕОМЕТРИЯ — UI
+   ============================================================ */
+function renderGeometryPanel() {
+  const thEl = $('#geoTheoremsList');
+  thEl.innerHTML = '';
+  for (const th of GEOMETRY_KNOWLEDGE.theorems) {
+    const div = document.createElement('div');
+    div.className = 'formula-item';
+    div.innerHTML = `<div class="title">${escapeHtml(th.name)}</div>`;
+    const stmt = document.createElement('div');
+    stmt.style.fontSize = '11px';
+    stmt.style.color = 'var(--fg2)';
+    stmt.style.textAlign = 'left';
+    stmt.style.padding = '4px 0';
+    stmt.textContent = th.statement;
+    div.appendChild(stmt);
+    const body = document.createElement('div');
+    body.className = 'body';
+    renderKatex(body, th.formula, true);
+    div.appendChild(body);
+    thEl.appendChild(div);
+  }
+
+  const figEl = $('#geoFiguresList');
+  figEl.innerHTML = '';
+  for (const [key, fig] of Object.entries(GEOMETRY_KNOWLEDGE.figures)) {
+    const div = document.createElement('div');
+    div.className = 'template-item';
+    let html = `<div class="tmpl-title">${escapeHtml(fig.name)}</div>`;
+    html += `<div style="font-size:11px;color:var(--fg2);margin-bottom:6px">${escapeHtml(fig.definition)}</div>`;
+    if (fig.properties) {
+      html += '<div style="font-size:11px;margin-top:4px">🔷 Свойства:</div><ul style="font-size:11px;padding-left:16px;margin:4px 0">';
+      for (const p of fig.properties) html += `<li>${escapeHtml(p)}</li>`;
+      html += '</ul>';
+    }
+    if (fig.signs) {
+      html += '<div style="font-size:11px;margin-top:4px">✅ Признаки:</div><ul style="font-size:11px;padding-left:16px;margin:4px 0">';
+      for (const s of fig.signs) html += `<li>${escapeHtml(s)}</li>`;
+      html += '</ul>';
+    }
+    div.innerHTML = html;
+    figEl.appendChild(div);
+  }
+
+  const fEl = $('#geoFormulasList');
+  fEl.innerHTML = '';
+  for (const f of GEOMETRY_KNOWLEDGE.formulas) {
+    const div = document.createElement('div');
+    div.className = 'formula-item';
+    div.innerHTML = `<div class="title">${escapeHtml(f.name)}</div>`;
+    const body = document.createElement('div');
+    body.className = 'body';
+    renderKatex(body, f.formula, true);
+    div.appendChild(body);
+    fEl.appendChild(div);
+  }
+
+  const tEl = $('#geoTrigList');
+  tEl.innerHTML = '';
+  const thId = document.createElement('div');
+  thId.className = 'formula-item';
+  thId.innerHTML = '<div class="title">Основное тригонометрическое тождество</div>';
+  const tiBody = document.createElement('div');
+  tiBody.className = 'body';
+  renderKatex(tiBody, GEOMETRY_KNOWLEDGE.trigIdentity, true);
+  thId.appendChild(tiBody);
+  tEl.appendChild(thId);
+
+  for (const tr of GEOMETRY_KNOWLEDGE.trig) {
+    const div = document.createElement('div');
+    div.className = 'template-item';
+    div.innerHTML = `<div class="tmpl-title">Угол ${tr.angle}</div>`;
+    const line = document.createElement('div');
+    line.style.fontSize = '12px';
+    line.style.textAlign = 'center';
+    line.innerHTML = 'sin: <span class="trig-s"></span> cos: <span class="trig-c"></span> tg: <span class="trig-t"></span>';
+    div.appendChild(line);
+    tEl.appendChild(div);
+    renderKatex(line.querySelector('.trig-s'), tr.sin, false);
+    renderKatex(line.querySelector('.trig-c'), tr.cos, false);
+    renderKatex(line.querySelector('.trig-t'), tr.tg, false);
+  }
+
+  const vEl = $('#geoVectorsList');
+  vEl.innerHTML = '';
+  for (const v of GEOMETRY_KNOWLEDGE.vectors) {
+    const div = document.createElement('div');
+    div.className = 'formula-item';
+    div.innerHTML = `<div class="title">${escapeHtml(v.name)}</div>`;
+    const body = document.createElement('div');
+    body.className = 'body';
+    renderKatex(body, v.formula, true);
+    div.appendChild(body);
+    vEl.appendChild(div);
+  }
+}
+
+function searchGeometry(query) {
+  const q = query.toLowerCase().trim();
+  const el = $('#geoResults');
+  if (!q) { el.innerHTML = ''; return; }
+
+  const results = [];
+  for (const th of GEOMETRY_KNOWLEDGE.theorems) {
+    if (th.name.toLowerCase().includes(q) || th.statement.toLowerCase().includes(q) || (th.keywords || []).some(k => k.includes(q))) {
+      results.push({ type: 'theorem', item: th });
+    }
+  }
+  for (const [key, fig] of Object.entries(GEOMETRY_KNOWLEDGE.figures)) {
+    if (fig.name.toLowerCase().includes(q) || fig.definition.toLowerCase().includes(q)) {
+      results.push({ type: 'figure', item: fig });
+    }
+  }
+  for (const f of GEOMETRY_KNOWLEDGE.formulas) {
+    if (f.name.toLowerCase().includes(q)) results.push({ type: 'formula', item: f });
+  }
+
+  if (results.length === 0) { el.innerHTML = '<div class="small">Ничего не найдено</div>'; return; }
+  el.innerHTML = `<div class="small mb">Найдено: ${results.length}</div>`;
+  for (const r of results) {
+    const div = document.createElement('div');
+    div.className = 'template-item';
+    if (r.type === 'theorem') {
+      div.innerHTML = `<div class="tmpl-title">📐 ${escapeHtml(r.item.name)}</div><div style="font-size:11px;color:var(--fg2)">${escapeHtml(r.item.statement)}</div><div class="body"></div>`;
+      renderKatex(div.querySelector('.body'), r.item.formula, true);
+    } else if (r.type === 'figure') {
+      div.innerHTML = `<div class="tmpl-title">🔷 ${escapeHtml(r.item.name)}</div><div style="font-size:11px;color:var(--fg2)">${escapeHtml(r.item.definition)}</div>`;
+    } else {
+      div.innerHTML = `<div class="tmpl-title">📏 ${escapeHtml(r.item.name)}</div><div class="body"></div>`;
+      renderKatex(div.querySelector('.body'), r.item.formula, true);
+    }
+    el.appendChild(div);
+  }
+}
+
+/* ============================================================
+   UI ОБЩЕЕ
+   ============================================================ */
+async function updateStats() {
+  const books = await idbGetAll('books');
+  const pages = await idbGetAll('pages');
+  const templates = await idbGetAll('templates');
+  const examples = await idbGetAll('examples');
+  const dataset = await idbGetAll('dataset');
+  $('#statBooks').textContent = books.length;
+  $('#statPages').textContent = pages.length;
+  $('#statTemplates').textContent = templates.length;
+  $('#statExamples').textContent = examples.length;
+  $('#statDataset').textContent = dataset.length;
+  $('#statRules').textContent = Object.keys(RULES).length;
+}
+
+async function updateExportStats() {
+  const books = await idbGetAll('books');
+  const pages = await idbGetAll('pages');
+  const templates = await idbGetAll('templates');
+  const examples = await idbGetAll('examples');
+  $('#exportBooks').textContent = books.length;
+  $('#exportPages').textContent = pages.length;
+  $('#exportTemplates').textContent = templates.length;
+  $('#exportExamples').textContent = examples.length;
+  const data = JSON.stringify({ books, pages, templates, examples });
+  $('#exportSize').textContent = (new Blob([data]).size / 1024).toFixed(1) + ' КБ';
+}
+
+function initTabs() {
+  $$('.tab-btn').forEach(btn => {
+    btn.onclick = () => {
+      $$('.tab-btn').forEach(b => b.classList.remove('active'));
+      $$('.panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      $('#panel-' + btn.dataset.tab).classList.add('active');
+      if (btn.dataset.tab === 'library') refreshBooksList();
+      if (btn.dataset.tab === 'export') updateExportStats();
+      if (btn.dataset.tab === 'learn') refreshTemplatesList();
+      if (btn.dataset.tab === 'dataset') updateDatasetStats();
+      if (btn.dataset.tab === 'geometry') renderGeometryPanel();
+      if (btn.dataset.tab === 'camera') {
+        // Не запускаем камеру автоматически — только по кнопке
+      }
+    };
+  });
+}
+
+function initButtons() {
+  $('#themeBtn').onclick = () => {
+    const t = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.body.dataset.theme = t;
+    $('#themeBtn').textContent = t === 'dark' ? '🌙' : '☀️';
+  };
+
+  $$('.mode-btn').forEach(b => {
+    b.onclick = () => {
+      $$('.mode-btn').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      currentSolveMode = b.dataset.mode;
+      toast('Режим: ' + b.textContent);
+    };
+  });
+
+  $('#btnSolve').onclick = solveAndShow;
+  $('#btnClearTask').onclick = () => {
+    $('#taskInput').value = '';
+    $('#solutionCard').style.display = 'none';
+  };
+  $('#taskInput').onkeydown = e => {
+    if (e.key === 'Enter' && e.ctrlKey) solveAndShow();
+  };
+  $('#btnSendToLearn').onclick = () => {
+    if (!lastSolution) return;
+    $('#newExampleText').value = lastSolution.text.substring(0, 100);
+    $('#newExampleType').value = lastSolution.result.ruleKey;
+    $$('.tab-btn').forEach(b => b.classList.remove('active'));
+    $$('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelector('[data-tab="learn"]').classList.add('active');
+    $('#panel-learn').classList.add('active');
+    toast('Выбери тип и нажми ➕');
+  };
+  $('#btnSaveToBook').onclick = async () => {
+    if (!lastSolution) return;
+    const bookId = currentBookId;
+    if (!bookId) { toast('Сначала выбери учебник'); return; }
+    const text = `Задача: ${lastSolution.text}\nОтвет: ${lastSolution.result.answer}`;
+    await addPageToBook(bookId, text, null, 'solution');
+    await refreshBooksList();
+    toast('Сохранено');
+  };
+  $('#btnAskAIAboutThis').onclick = () => {
+    if (!lastSolution) return;
+    $$('.tab-btn').forEach(b => b.classList.remove('active'));
+    $$('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelector('[data-tab="ai"]').classList.add('active');
+    $('#panel-ai').classList.add('active');
+    $('#aiInput').value = 'Объясни подробнее: ' + lastSolution.text;
+    toast('Нажми Отправить');
+  };
+  $('#btnRedrawFigure').onclick = () => {
+    if (!lastSolution) return;
+    drawTaskFigure(lastSolution.text, $('#figureContainer'));
+    toast('Перерисовано');
+  };
+
+  // Камера
+  $('#btnStartCamera').onclick = startCamera;
+  $('#btnStopCamera').onclick = stopCamera;
+  $('#btnSwitchCamera').onclick = switchCamera;
+  $('#btnSnapshot').onclick = takeSnapshot;
+  $('#btnRetakeCamera').onclick = () => {
+    currentSnapshot = null;
+    $('#snapshotPreview').style.display = 'none';
+    $('#snapshotActions').style.display = 'none';
+    $('#cameraOCRResult').style.display = 'none';
+    $('#cameraSolution').innerHTML = '';
+  };
+  $('#btnDeleteSnapshot').onclick = () => {
+    currentSnapshot = null;
+    $('#snapshotPreview').style.display = 'none';
+    $('#snapshotActions').style.display = 'none';
+    $('#cameraOCRResult').style.display = 'none';
+    $('#cameraSolution').innerHTML = '';
+    toast('Удалено');
+  };
+  $('#btnSolveFromCamera').onclick = solveFromSnapshot;
+
+  // Загрузка фото
+  $('#photoDropZone2').onclick = () => $('#photoFile2').click();
+  $('#photoFile2').onchange = e => {
+    const f = e.target.files[0];
+    if (f) {
+      currentPhotoFile = f;
+      const url = URL.createObjectURL(f);
+      $('#photoPreview').src = url;
+      $('#photoPreview').style.display = 'block';
+      $('#photoActions').style.display = 'flex';
+    }
+  };
+  $('#photoDropZone2').ondragover = e => { e.preventDefault(); $('#photoDropZone2').classList.add('dragover'); };
+  $('#photoDropZone2').ondragleave = () => $('#photoDropZone2').classList.remove('dragover');
+  $('#photoDropZone2').ondrop = e => {
+    e.preventDefault();
+    $('#photoDropZone2').classList.remove('dragover');
+    const f = e.dataTransfer.files[0];
+    if (f && f.type.startsWith('image/')) {
+      currentPhotoFile = f;
+      const url = URL.createObjectURL(f);
+      $('#photoPreview').src = url;
+      $('#photoPreview').style.display = 'block';
+      $('#photoActions').style.display = 'flex';
+    }
+  };
+  $('#btnSolveFromPhoto').onclick = async () => {
+    if (!currentPhotoFile) { toast('Нет фото'); return; }
+    await solveFromImageFile(currentPhotoFile, '#photoOCRResult', '#cameraSolution');
+  };
+  $('#btnDeletePhoto').onclick = () => {
+    currentPhotoFile = null;
+    $('#photoPreview').style.display = 'none';
+    $('#photoActions').style.display = 'none';
+    $('#photoOCRResult').style.display = 'none';
+  };
+
+  // ИИ
+  $('#btnLoadAI').onclick = loadAI;
+  $('#btnUnloadAI').onclick = unloadAI;
+  $('#btnAISend').onclick = () => sendAIMessage($('#aiInput').value);
+  $('#aiInput').onkeydown = e => {
+    if (e.key === 'Enter' && e.ctrlKey) sendAIMessage($('#aiInput').value);
+  };
+  $('#btnAIClear').onclick = () => {
+    $('#aiChat').innerHTML = '';
+    toast('Чат очищен');
+  };
+  $('#btnAIPresetGeometry').onclick = () => {
+    aiCurrentPrompt = 'Ты — учитель геометрии. Отвечай по-русски. Объясняй пошагово. Используй LaTeX для формул (оборачивай в $...$). Всегда указывай теорему.';
+    toast('Промпт: геометрия');
+  };
+  $('#btnAIPresetAlgebra').onclick = () => {
+    aiCurrentPrompt = 'Ты — учитель алгебры. Отвечай по-русски. Объясняй пошагово. LaTeX через $...$.';
+    toast('Промпт: алгебра');
+  };
+  $('#btnAIPresetTutor').onclick = () => {
+    aiCurrentPrompt = 'Ты — добрый учитель математики. Объясняй для школьника 8 класса. Простые примеры. LaTeX через $...$.';
+    toast('Промпт: учитель');
+  };
+
+  // Геометрия
+  $('#geoSearch').oninput = e => searchGeometry(e.target.value);
+
+  // Рисовать
+  $('#btnDraw').onclick = () => {
+    const text = $('#drawInput').value.trim();
+    if (!text) { toast('Введи фигуру'); return; }
+    drawSimpleShape(text);
+  };
+  $('#btnClearDraw').onclick = () => {
+    $('#drawInput').value = '';
+    const ctx = drawCanvas.getContext('2d');
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
+  };
+  $('#btnDownloadDraw').onclick = () => {
+    drawCanvas.toBlob(b => downloadBlob(b, 'figure-' + Date.now() + '.png'));
+  };
+
+  // График
+  $('#btnPlot').onclick = drawPlot;
+  $('#btnPlotClear').onclick = () => { $('#plotInput').value = ''; plotClear(); };
+  $('#btnPlotDownload').onclick = () => {
+    plotCanvas.toBlob(b => downloadBlob(b, 'graph-' + Date.now() + '.png'));
+  };
+
+  // Обучение
+  $('#btnTrain').onclick = trainClassifier;
+  $('#btnCancelTrain').onclick = () => { if (trainAbort) trainAbort.abort(); };
+  $('#btnAddExample').onclick = async () => {
+    const text = $('#newExampleText').value.trim();
+    const type = $('#newExampleType').value;
+    if (!text || !type) { toast('Введи текст и тип'); return; }
+    await idbPut('examples', { id: uid(), text, type, date: new Date().toISOString() });
+    $('#newExampleText').value = '';
+    await refreshExamplesList();
+    toast('Добавлено');
+  };
+  $('#btnAddDefaults').onclick = loadDefaultExamples;
+  $('#btnAddGeometry').onclick = async () => {
+    const existing = await getExamples();
+    const existingSet = new Set(existing.map(e => e.text + '|' + e.type));
+    let added = 0;
+    const geoExamples = [
+      ['площадь круга r=5', 'circle_area'],
+      ['площадь квадрата a=5', 'square_area'],
+      ['площадь прямоугольника a=4 b=5', 'rectangle_area'],
+      ['площадь треугольника a=6 h=4', 'triangle_area'],
+      ['площадь трапеции a=4 b=6 h=3', 'trapezoid_area'],
+      ['площадь параллелограмма a=5 h=3', 'parallelogram_area'],
+      ['площадь ромба d1=4 d2=6', 'rhombus_area'],
+      ['объём куба a=3', 'cube_volume'],
+      ['найди гипотенузу катеты 3 и 4', 'pythagoras'],
+      ['найди расстояние A(1;2) B(4;6)', 'distance_points'],
+      ['найди середину A(1;2) B(5;8)', 'midpoint'],
+      ['скалярное произведение a(1;2) b(3;4)', 'scalar_product'],
+      ['площадь сектора R=5 alpha=60', 'circle_sector'],
+      ['длина окружности r=5', 'circle_circumference'],
+      ['периметр квадрата a=5', 'square_perimeter'],
+      ['периметр прямоугольника a=4 b=5', 'rectangle_perimeter']
+    ];
+    for (const [text, type] of geoExamples) {
+      const key = text + '|' + type;
+      if (!existingSet.has(key)) {
+        await idbPut('examples', { id: uid(), text, type, date: new Date().toISOString() });
+        added++;
+      }
+    }
+    await refreshExamplesList();
+    toast('Геометрия: +' + added);
+  };
+  $('#btnAddFromBooks').onclick = async () => {
+    const pages = await idbGetAll('pages');
+    let added = 0;
+    const existing = await getExamples();
+    const existingSet = new Set(existing.map(e => e.text + '|' + e.type));
+    for (const p of pages) {
+      const lines = (p.text || '').split(/[.\n]/).filter(l => l.trim().length > 10);
+      for (const line of lines.slice(0, 10)) {
+        const result = detectAndSolve(line);
+        if (result) {
+          const key = line.substring(0, 100) + '|' + result.ruleKey;
+          if (!existingSet.has(key)) {
+            await idbPut('examples', { id: uid(), text: line.substring(0, 100), type: result.ruleKey, date: new Date().toISOString() });
+            added++;
+          }
+        }
+      }
+    }
+    await refreshExamplesList();
+    toast('Из учебников: +' + added);
+  };
+  $('#btnClearExamples').onclick = async () => {
+    if (!confirm('Очистить примеры?')) return;
+    await idbClear('examples');
+    await refreshExamplesList();
+  };
+  $('#btnSaveClassifier').onclick = async () => { await saveClassifier(); toast('Сохранено'); };
+  $('#btnLoadClassifier').onclick = loadClassifier;
+  $('#btnResetClassifier').onclick = () => {
+    if (!confirm('Сбросить?')) return;
+    if (classifierModel) classifierModel.dispose();
+    classifierModel = null;
+    classifierTrained = false;
+    $('#trainModelStatus').textContent = 'не обучена';
+    $('#statClassifier').textContent = 'не обучен';
+    toast('Сброшено');
+  };
+  $('#btnRefreshTemplates').onclick = refreshTemplatesList;
+  $('#btnCleanTemplates').onclick = cleanTemplates;
+  $('#btnClearTemplates').onclick = async () => {
+    if (!confirm('Очистить шаблоны?')) return;
+    await idbClear('templates');
+    await refreshTemplatesList();
+    await updateStats();
+  };
+  $('#btnTestClassifier').onclick = () => {
+    const text = $('#testClassifierInput').value.trim();
+    if (!text) return;
+    const pred = predictType(text);
+    const rule = detectAndSolve(text);
+    let out = '';
+    if (pred) out += `🧠 Классификатор: ${pred.type} (${(pred.confidence * 100).toFixed(1)}%)\n\n`;
+    else out += '🧠 Классификатор не обучен\n\n';
+    if (rule) out += `📐 Решатель: ${rule.ruleName}\n   ${rule.answer}`;
+    else out += '📐 Правило не найдено';
+    $('#testClassifierResult').textContent = out;
+    $('#testClassifierResult').style.display = 'block';
+  };
+
+  // Учебники
+  $('#btnAddBook').onclick = async () => {
+    const name = $('#newBookName').value.trim();
+    if (!name) { toast('Введи название'); return; }
+    const book = await createBook(name);
+    $('#newBookName').value = '';
+    selectBook(book.id);
+  };
+  $('#btnViewBookPages').onclick = viewBookPages;
+  $('#btnViewBookTemplates').onclick = viewBookTemplates;
+  $('#btnAutoProcessBook').onclick = autoProcessBook;
+  $('#btnDeleteBook').onclick = async () => {
+    if (!currentBookId) return;
+    await deleteBook(currentBookId);
+    $('#bookCard').style.display = 'none';
+  };
+
+  // PDF
+  $('#pdfDropZone').onclick = () => $('#pdfFile').click();
+  $('#pdfFile').onchange = e => { const f = e.target.files[0]; if (f) loadPDF(f); };
+  $('#pdfDropZone').ondragover = e => { e.preventDefault(); $('#pdfDropZone').classList.add('dragover'); };
+  $('#pdfDropZone').ondragleave = () => $('#pdfDropZone').classList.remove('dragover');
+  $('#pdfDropZone').ondrop = e => {
+    e.preventDefault();
+    $('#pdfDropZone').classList.remove('dragover');
+    const f = e.dataTransfer.files[0];
+    if (f && f.type === 'application/pdf') loadPDF(f);
+  };
+  $('#btnReadPdf').onclick = async () => {
+    if (!pdfDoc) { toast('Загрузи PDF'); return; }
+    const bookId = $('#pdfBookSelect').value || currentBookId;
+    if (!bookId) { toast('Выбери учебник'); return; }
+    for (let i = 1; i <= pdfDoc.numPages; i++) {
+      const page = await pdfDoc.getPage(i);
+      const content = await page.getTextContent();
+      const lines = {};
+      for (const item of content.items) {
+        const y = Math.round(item.transform[5]);
+        if (!lines[y]) lines[y] = [];
+        lines[y].push(item);
+      }
+      const sortedY = Object.keys(lines).map(Number).sort((a, b) => b - a);
+      const result = [];
+      for (const y of sortedY) {
+        const line = lines[y].sort((a, b) => a.transform[4] - b.transform[4]);
+        result.push(line.map(i => i.str).join(' '));
+      }
+      const text = result.join('\n');
+      if (text.trim()) await addPageToBook(bookId, text, null, 'pdf:page' + i);
+      $('#pdfFill').style.width = (i / pdfDoc.numPages * 100) + '%';
+      if (i % 5 === 0) await new Promise(r => setTimeout(r, 30));
+    }
+    await refreshBooksList();
+    await refreshTemplatesList();
+    await updateStats();
+    if (currentBookId === bookId) await updateBookStats();
+    toast('PDF прочитан');
+  };
+  $('#btnPdfPrev').onclick = () => { if (pdfCurrentPage > 1) renderPdfPage(pdfCurrentPage - 1); };
+  $('#btnPdfNext').onclick = () => { if (pdfDoc && pdfCurrentPage < pdfDoc.numPages) renderPdfPage(pdfCurrentPage + 1); };
+  $('#btnSavePdfPage').onclick = async () => {
+    const text = $('#pdfPageText').textContent;
+    if (!text || text === '—') { toast('Нет текста'); return; }
+    const bookId = $('#pdfBookSelect').value || currentBookId;
+    if (!bookId) { toast('Выбери учебник'); return; }
+    await addPageToBook(bookId, text, null, 'pdf:page' + pdfCurrentPage);
+    await refreshBooksList();
+    await refreshTemplatesList();
+    await updateStats();
+    toast('Сохранено');
+  };
+  $('#btnCheckPdfPage').onclick = () => {
+    const text = $('#pdfPageText').textContent;
+    if (isBrokenPdfText(text)) {
+      alert('❌ Текст страницы битый. Введи задачу вручную или используй OCR.');
+    } else {
+      alert('✅ Текст извлечён корректно.');
+    }
+  };
+  $('#btnPdfRaw').onclick = () => {
+    $('#pdfRawText').textContent = $('#pdfPageText').textContent;
+    $('#pdfRawText').style.display = 'block';
+  };
+  $('#btnPdfEdit').onclick = () => {
+    $('#pdfEditedText').value = $('#pdfPageText').textContent;
+    $('#pdfEditedText').style.display = 'block';
+    $('#btnSaveEditedPage').style.display = 'block';
+  };
+  $('#btnSaveEditedPage').onclick = async () => {
+    const text = $('#pdfEditedText').value;
+    const bookId = $('#pdfBookSelect').value || currentBookId;
+    if (!bookId) { toast('Выбери учебник'); return; }
+    await addPageToBook(bookId, text, null, 'pdf:edited');
+    await refreshBooksList();
+    await refreshTemplatesList();
+    toast('Сохранено');
+  };
+
+  // OCR
+  $('#btnLoadOCR').onclick = loadOCRModel;
+  $('#photoDropZone').onclick = () => $('#photoFile').click();
+  $('#photoFile').onchange = e => {
+    const f = e.target.files[0];
+    if (f) { runOCR(f, ocrLastMode); $('#ocrModes').style.display = 'flex'; }
+  };
+  $('#photoDropZone').ondragover = e => { e.preventDefault(); $('#photoDropZone').classList.add('dragover'); };
+  $('#photoDropZone').ondragleave = () => $('#photoDropZone').classList.remove('dragover');
+  $('#photoDropZone').ondrop = e => {
+    e.preventDefault();
+    $('#photoDropZone').classList.remove('dragover');
+    const f = e.dataTransfer.files[0];
+    if (f && f.type.startsWith('image/')) { runOCR(f, ocrLastMode); $('#ocrModes').style.display = 'flex'; }
+  };
+  $$('[data-ocrmode]').forEach(b => {
+    b.onclick = () => {
+      ocrLastMode = b.dataset.ocrmode;
+      $$('[data-ocrmode]').forEach(x => x.style.borderColor = '');
+      b.style.borderColor = 'var(--accent)';
+      const f = $('#photoFile').files[0];
+      if (f) runOCR(f, ocrLastMode);
+    };
+  });
+  $('#btnSaveOCR').onclick = async () => {
+    if (!ocrLastResult) return;
+    const bookId = $('#ocrBookSelect').value || currentBookId;
+    if (!bookId) { toast('Выбери учебник'); return; }
+    await addPageToBook(bookId, ocrLastResult, ocrImage, 'ocr:' + ocrLastMode);
+    await refreshBooksList();
+    await refreshTemplatesList();
+    await updateStats();
+    toast('Сохранено');
+  };
+  $('#btnExtractTemplates').onclick = () => {
+    if (!ocrLastResult) return;
+    const templates = extractTemplates(ocrLastResult);
+    if (templates.length === 0) { toast('Шаблоны не найдены'); return; }
+    let msg = '📐 Найдено: ' + templates.length + '\n\n';
+    templates.forEach((t, i) => {
+      msg += `${i+1}. ${RULES[t.ruleKey] ? RULES[t.ruleKey].name : t.ruleKey}\n   ${t.sample}\n\n`;
+    });
+    alert(msg);
+  };
+  $('#btnAskAIAboutOCR').onclick = () => {
+    if (!ocrLastResult) return;
+    $$('.tab-btn').forEach(b => b.classList.remove('active'));
+    $$('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelector('[data-tab="ai"]').classList.add('active');
+    $('#panel-ai').classList.add('active');
+    $('#aiInput').value = 'Разбери задачу пошагово: ' + ocrLastResult.substring(0, 500);
+    toast('Нажми Отправить');
+  };
+  $('#btnClearOCR').onclick = () => {
+    ocrLastResult = '';
+    ocrImage = null;
+    $('#ocrResult').style.display = 'none';
+    $('#ocrPreview').style.display = 'none';
+    $('#ocrActions').style.display = 'none';
+    $('#ocrModes').style.display = 'none';
+  };
+
+  // Поиск
+  $('#globalSearch').oninput = async e => {
+    const q = e.target.value.trim().toLowerCase();
+    const el = $('#searchResults');
+    if (!q) { el.innerHTML = ''; return; }
+    const pages = await idbGetAll('pages');
+    const templates = await idbGetAll('templates');
+    const books = await idbGetAll('books');
+    const results = [];
+    for (const p of pages) {
+      if ((p.text || '').toLowerCase().includes(q)) {
+        const book = books.find(b => b.id === p.bookId);
+        results.push({ type: 'page', book: book ? book.name : '?', text: p.text.substring(0, 200) });
+      }
+    }
+    for (const t of templates) {
+      if (t.sample.toLowerCase().includes(q)) {
+        const book = books.find(b => b.id === t.bookId);
+        results.push({ type: 'template', book: book ? book.name : '?', text: t.sample });
+      }
+    }
+    for (const th of GEOMETRY_KNOWLEDGE.theorems) {
+      if (th.name.toLowerCase().includes(q) || th.statement.toLowerCase().includes(q)) {
+        results.push({ type: 'theorem', book: 'Геометрия', text: th.name + ': ' + th.statement });
+      }
+    }
+    if (results.length === 0) { el.innerHTML = '<div class="small">Ничего не найдено</div>'; return; }
+    el.innerHTML = `<div class="small mb">Найдено: ${results.length}</div>`;
+    for (const r of results.slice(0, 30)) {
+      const div = document.createElement('div');
+      div.className = 'page-item';
+      div.innerHTML = `<div class="book">${escapeHtml(r.book)} [${r.type}]</div><div>${escapeHtml(r.text)}</div>`;
+      el.appendChild(div);
+    }
+  };
+
+  // Датасет
+  $('#btnExportDataset').onclick = () => exportDataset(false);
+  $('#btnExportVerifiedOnly').onclick = () => exportDataset(true);
+  $('#btnImportDataset').onclick = () => $('#importDatasetFile').click();
+  $('#importDatasetFile').onchange = e => {
+    const f = e.target.files[0];
+    if (f) importDataset(f);
+  };
+  $('#btnClearDataset').onclick = async () => {
+    if (!confirm('Очистить датасет?')) return;
+    await idbClear('dataset');
+    await updateDatasetStats();
+    toast('Очищено');
+  };
+  $('#btnVerifyDataset').onclick = verifyDataset;
+
+  // Экспорт
+  $('#btnExportAll').onclick = async () => {
+    const books = await idbGetAll('books');
+    const pages = await idbGetAll('pages');
+    const templates = await idbGetAll('templates');
+    const examples = await idbGetAll('examples');
+    const dataset = await idbGetAll('dataset');
+    const data = { version: 3, books, pages, templates, examples, dataset, date: new Date().toISOString() };
+    downloadBlob(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }), 'mathsolver-full-' + Date.now() + '.json');
+    toast('Экспортировано');
+  };
+  $('#btnImportAll').onclick = () => $('#importAllFile').click();
+  $('#importAllFile').onchange = async e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    try {
+      const text = await f.text();
+      const data = JSON.parse(text);
+      if (data.books) for (const b of data.books) await idbPut('books', b);
+      if (data.pages) for (const p of data.pages) await idbPut('pages', p);
+      if (data.templates) for (const t of data.templates) await idbPut('templates', t);
+      if (data.examples) for (const ex of data.examples) await idbPut('examples', ex);
+      if (data.dataset) for (const d of data.dataset) await idbPut('dataset', d);
+      await refreshBooksList();
+      await refreshExamplesList();
+      await refreshTemplatesList();
+      await updateStats();
+      await updateDatasetStats();
+      toast('Импортировано');
+    } catch (e) { toast('Ошибка: ' + e.message); }
+  };
+  $('#btnForceSave').onclick = () => toast('Сохраняется автоматически');
+  $('#btnFullReset').onclick = async () => {
+    if (!confirm('Удалить всё?')) return;
+    await idbClear('books');
+    await idbClear('pages');
+    await idbClear('templates');
+    await idbClear('examples');
+    await idbClear('dataset');
+    await idbClear('classifier');
+    await idbClear('chat');
+    await refreshBooksList();
+    await refreshExamplesList();
+    await refreshTemplatesList();
+    await updateStats();
+    await updateDatasetStats();
+    toast('Очищено');
+  };
+  $('#btnExportBooks').onclick = () => $('#btnExportAll').click();
+  $('#btnImportBooks').onclick = () => $('#importAllFile').click();
+  $('#btnClearBooks').onclick = $('#btnFullReset').onclick;
+
+  // Лог
+  $('#btnClearLog').onclick = () => { $('#logOut').textContent = '—'; };
+  $('#btnDiag').onclick = () => {
+    const info = {
+      WebGPU: !!navigator.gpu,
+      transformers: typeof transformers !== 'undefined',
+      tfjs: typeof tf !== 'undefined',
+      katex: typeof katex !== 'undefined',
+      pdfjs: !!window.pdfjsLib,
+      indexedDB: !!window.indexedDB,
+      camera: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),
+      aiLoaded: !!aiPipeline,
+      ocrLoaded: !!ocrPipeline,
+      aiDevice: aiDevice,
+      classifierTrained: classifierTrained,
+      rules: Object.keys(RULES).length,
+      theorems: GEOMETRY_KNOWLEDGE.theorems.length,
+      figures: Object.keys(GEOMETRY_KNOWLEDGE.figures).length
+    };
+    $('#diagOut').textContent = JSON.stringify(info, null, 2);
+    $('#diagOut').style.display = 'block';
+  };
+}
+
+async function init() {
+  try {
+    await openDB();
+    logMsg('✅ DB готова');
+  } catch (e) { logMsg('❌ DB: ' + e.message); }
+
+  initTabs();
+  initButtons();
+  renderExamples();
+  plotClear();
+
+  // Очищаем canvas для рисования
+  const drawCtx = drawCanvas.getContext('2d');
+  drawCtx.fillStyle = '#fff';
+  drawCtx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
+
+  const sel = $('#newExampleType');
+  sel.innerHTML = '';
+  for (const key of Object.keys(RULES)) {
+    const opt = document.createElement('option');
+    opt.value = key;
+    opt.textContent = key;
+    sel.appendChild(opt);
+  }
+
+  await updateStats();
+  await refreshBooksList();
+  await refreshExamplesList();
+  await refreshTemplatesList();
+  await updateDatasetStats();
+
+  try { await loadClassifier(); } catch (e) {}
+
+  renderGeometryPanel();
+
+  logMsg('WebGPU: ' + (navigator.gpu ? '✓' : '✗'));
+  logMsg('TF.js: ' + (typeof tf !== 'undefined' ? '✓' : '✗'));
+  logMsg('PDF.js: ' + (window.pdfjsLib ? '✓' : '⚠'));
+  logMsg('Камера: ' + (navigator.mediaDevices ? '✓' : '✗'));
+  logMsg('Правил: ' + Object.keys(RULES).length);
+  logMsg('Теорем: ' + GEOMETRY_KNOWLEDGE.theorems.length);
+
+  $('#statusBadge').textContent = 'готово';
+  $('#statusBadge').className = 'status-badge ok';
+  toast('Готово');
+}
+
+window.addEventListener('pdfjs-ready', () => logMsg('✅ PDF.js загружен'));
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  setTimeout(init, 800);
+} else {
+  document.addEventListener('DOMContentLoaded', () => setTimeout(init, 800));
+}
+</script>
+</body>
+</html>
